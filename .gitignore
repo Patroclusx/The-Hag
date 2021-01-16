@@ -8,6 +8,7 @@
 [Bb]uild/
 [Bb]uilds/
 [Ll]ogs/
+[Pp]lugins/
 [Mm]emoryCaptures/
 
 # Asset meta data should only be ignored when the corresponding asset is also ignored
@@ -58,3 +59,4 @@ sysinfo.txt
 # Crashlytics generated file
 crashlytics-build.properties
 
+Source/The Hag/Assets/Plugins.meta
