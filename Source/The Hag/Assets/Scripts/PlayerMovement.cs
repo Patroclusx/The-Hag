@@ -8,11 +8,16 @@ public class PlayerMovement : MonoBehaviour
     public CharacterController characterController;
 
     [System.NonSerialized]
-    public float speed = 5f;
+    public float speed;
     [System.NonSerialized]
     public float gravity = -15f;
     [System.NonSerialized]
     public float jumpHeight = 2f;
+    [System.NonSerialized]
+    public float walk = 5f;
+    [System.NonSerialized]
+    public float sprint = 10f;
+   
 
     Vector3 moveVelocity;
 
@@ -35,14 +40,26 @@ public class PlayerMovement : MonoBehaviour
 
         float x = Input.GetAxis("Horizontal");
         float z = Input.GetAxis("Vertical");
+        
 
         moveVelocity = transform.right * x + transform.forward * z;
 
         characterController.Move(moveVelocity * speed * Time.deltaTime);
-
+         //Sprinting logic
+        if (Input.GetButton("Sprint") && z == 1 && isGrounded)
+        {
+            speed = sprint;
+           
+        }
+        else
+        {
+            speed = walk;
+            
+        }
+        //Jumping logic
         if (Input.GetButtonDown("Jump") && isGrounded)
         {
-            velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
+            velocity.y = Mathf.Sqrt(jumpHeight * -1f * gravity);
         }
 
         velocity.y += gravity * Time.deltaTime;
