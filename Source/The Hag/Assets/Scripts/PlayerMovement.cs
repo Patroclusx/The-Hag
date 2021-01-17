@@ -17,7 +17,8 @@ public class PlayerMovement : MonoBehaviour
     Vector3 moveVelocity;
 
     public Transform groundCheck;
-    public float groundDistance = 0.4f;
+    [System.NonSerialized]
+    public float groundDistance = 0.1f;
     public LayerMask groundMask;
 
     Vector3 velocity;
