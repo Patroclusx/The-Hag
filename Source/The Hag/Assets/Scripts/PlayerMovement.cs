@@ -4,68 +4,156 @@ using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
-
+    public Transform playerBody;
     public CharacterController characterController;
-
-    [System.NonSerialized]
-    public float speed;
-    [System.NonSerialized]
-    public float gravity = -15f;
-    [System.NonSerialized]
-    public float jumpHeight = 2f;
-    [System.NonSerialized]
-    public float walk = 5f;
-    [System.NonSerialized]
-    public float sprint = 10f;
-   
-
-    Vector3 moveVelocity;
-
     public Transform groundCheck;
-    public float groundDistance = 0.4f;
-    public LayerMask groundMask;
 
-    Vector3 velocity;
-    bool isGrounded;
+    [HideInInspector]
+    public float playerSpeed;
+    public float walkSpeed = 3f;
+    public float sprintSpeed = 5f;
+    [HideInInspector]
+    public bool isWalking = false;
+    [HideInInspector]
+    public bool isRunning = false;
+
+    [HideInInspector]
+    public Vector3 moveVelocity;
+
+    public float gravityForce = -25f;
+    public float jumpHeight = 2.5f;
+    [HideInInspector]
+    public Vector3 jumpVelocity;
+
+    [HideInInspector]
+    public bool isCrouching = false;
+    public float crouchScaleY;
+
+    [HideInInspector]
+    public bool isGrounded;
+    float groundDistance = 0.3f;
+    public LayerMask groundMask;
 
     // Update is called once per frame
     void Update()
     {
+        //Ground check logic
         isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
 
-        if(isGrounded && velocity.y < 0)
+        //Movement logic 
+        if (Input.GetAxis("Horizontal") != 0 || Input.GetAxis("Vertical") != 0)
         {
-            velocity.y = -2f;
-        }
-
-        float x = Input.GetAxis("Horizontal");
-        float z = Input.GetAxis("Vertical");
-        
-
-        moveVelocity = transform.right * x + transform.forward * z;
-
-        characterController.Move(moveVelocity * speed * Time.deltaTime);
-         //Sprinting logic
-        if (Input.GetButton("Sprint") && z == 1 && isGrounded)
-        {
-            speed = sprint;
-           
+            MovePlayer();
+            StepSound();
         }
         else
         {
-            speed = walk;
-            
+            isWalking = false;
+            isRunning = false;
         }
-        //Jumping logic
-        if (Input.GetButtonDown("Jump") && isGrounded)
+
+        //Crouching logic
+        if (Input.GetButtonDown("Crouch"))
         {
-            velocity.y = Mathf.Sqrt(jumpHeight * -1f * gravity);
+            Crouch();
         }
 
-        velocity.y += gravity * Time.deltaTime;
+        //Jumping logic
+        if (Input.GetButtonDown("Jump") && isGrounded && !isCrouching)
+        {
+            Jump();
+        }
 
-        characterController.Move(velocity * Time.deltaTime);
+        //Gravity logic
+        ApplyGravity();
+    }
 
+    void ApplyGravity()
+    {
+        if (!isGrounded)
+        {
+            jumpVelocity.y += gravityForce * Time.deltaTime;
+        }
+        else
+        {
+            if (jumpVelocity.y < 0f)
+            {
+                jumpVelocity.y = -4f;
+            }
+        }
+
+        characterController.Move(jumpVelocity * Time.deltaTime);
+    }
+
+    void MovePlayer()
+    {
+        float x = Input.GetAxis("Horizontal");
+        float z = Input.GetAxis("Vertical");
+
+        //Sprinting logic
+        if (Input.GetButton("Sprint") && z == 1 && !isCrouching)
+        {
+            playerSpeed = sprintSpeed;
+            isRunning = true;
+            isWalking = false;
+        }
+        else
+        {
+            if (!isCrouching)
+            {
+                playerSpeed = walkSpeed;
+            }
+            else
+            {
+                playerSpeed = walkSpeed * 0.5f;
+            }
+
+            isWalking = true;
+            isRunning = false;
+        }
+
+        if (isGrounded || isCrouching)
+        {
+            moveVelocity = playerBody.right * x + playerBody.forward * z;
+        }
+
+        //Strafe running speed fix
+        if (x != 0 && z != 0)
+        {
+            playerSpeed *= 0.75f;
+        }
+
+        characterController.Move(moveVelocity * playerSpeed * Time.deltaTime);
+    }
+
+    void Jump()
+    {
+        jumpVelocity.y = Mathf.Sqrt(jumpHeight * -1f * gravityForce);
+    }
+
+    void Crouch()
+    {
+        if (!isCrouching)
+        {
+            playerBody.localScale = new Vector3(playerBody.localScale.x, crouchScaleY, playerBody.localScale.z);
+            isCrouching = true;
+        }
+        else
+        {
+            Ray ray = new Ray();
+            RaycastHit hit;
+            ray.origin = playerBody.position;
+            ray.direction = Vector3.up;
+            if (!Physics.Raycast(ray, out hit, 1f))
+            {
+                playerBody.localScale = new Vector3(playerBody.localScale.x, 1.1f, playerBody.localScale.z);
+                isCrouching = false;
+            }
+        }
+    }
+
+    void StepSound()
+    {
         if (isGrounded && moveVelocity.magnitude > 0.6f && !GetComponent<AudioSource>().isPlaying)
         {
             GetComponent<AudioSource>().Play();
