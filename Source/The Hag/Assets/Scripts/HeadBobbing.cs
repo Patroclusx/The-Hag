@@ -4,12 +4,13 @@ using UnityEngine;
 
 public class HeadBobbing : MonoBehaviour
 {
+    public PlayerMovement playerMovement;
+
     public float walkingBobbingSpeed = 14f;
     public float runningBobbingSpeed = 18f;
     public float bobbingAmount = 0.05f;
-    public PlayerMovement playerMovement;
 
-    float defaultPosY = 0.74f;
+    float defaultPosY;
     float timer = 0;
 
     // Start is called before the first frame update
@@ -31,7 +32,7 @@ public class HeadBobbing : MonoBehaviour
         {
             //Idle
             timer = 0;
-            transform.localPosition = new Vector3(transform.localPosition.x, Mathf.Lerp(transform.localPosition.y, defaultPosY, Time.deltaTime * walkingBobbingSpeed), transform.localPosition.z);
+            transform.localPosition = new Vector3(transform.localPosition.x, Mathf.Lerp(transform.localPosition.y, defaultPosY, Time.deltaTime * runningBobbingSpeed), transform.localPosition.z);
         }
     }
 }

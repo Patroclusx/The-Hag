@@ -48,12 +48,13 @@ public class PlayerMovement : MonoBehaviour
         }
         else
         {
+            playerSpeed = 0f;
             isWalking = false;
             isRunning = false;
         }
 
         //Crouching logic
-        if (Input.GetButtonDown("Crouch"))
+        if (Input.GetButtonDown("Crouch") /**&& Input.GetButtonUp("Crouch")**/ && isGrounded)
         {
             Crouch();
         }
@@ -144,7 +145,7 @@ public class PlayerMovement : MonoBehaviour
             RaycastHit hit;
             ray.origin = playerBody.position;
             ray.direction = Vector3.up;
-            if (!Physics.Raycast(ray, out hit, 1f))
+            if (!Physics.Raycast(ray, out hit, 1.7f))
             {
                 playerBody.localScale = new Vector3(playerBody.localScale.x, 1.1f, playerBody.localScale.z);
                 isCrouching = false;
