@@ -123,13 +123,13 @@ public class PlayerMovement : MonoBehaviour
         Vector3 groundParallel = Vector3.Cross(playerBody.up, n);
         slopeParallel = Vector3.Cross(groundParallel, n);
 
-        float currentSlope = Mathf.Round(Vector3.Angle(slopeHit.normal, playerBody.up));
+        float currentSlope = Mathf.Round(Vector3.Angle(n, playerBody.up));
 
-        if (currentSlope > characterController.slopeLimit && isGrounded)
+        if (currentSlope > characterController.slopeLimit && isGrounded && (slopeHit.collider.gameObject.layer == LayerMask.NameToLayer("Slope")))
         {
-            isSliding = true;
-            slopeSpeed += Time.deltaTime * (slopeParallel.magnitude * 12f);
+            slopeSpeed += Time.deltaTime * (slopeParallel.magnitude + (isSliding ? 0f : (moveVelocity.magnitude * 80f))) * 12f;
             characterController.Move(slopeParallel * slopeSpeed * Time.deltaTime);
+            isSliding = true;
         }
         else
         {
@@ -181,6 +181,7 @@ public class PlayerMovement : MonoBehaviour
         {
             playerSpeed *= 0.75f;
         }
+
 
         characterController.Move(moveVelocity * playerSpeed * Time.deltaTime);
     }
