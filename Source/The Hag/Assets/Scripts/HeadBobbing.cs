@@ -8,7 +8,7 @@ public class HeadBobbing : MonoBehaviour
 
     public float walkingBobbingSpeed = 14f;
     public float runningBobbingSpeed = 18f;
-    public float bobbingAmount = 0.05f;
+    public float bobbingAmount = 0.03f;
 
     float defaultPosY;
     float timer = 0;
