@@ -20,19 +20,35 @@ public class PlayerMovement : MonoBehaviour
     [HideInInspector]
     public Vector3 moveVelocity;
 
-    public float gravityForce = -25f;
-    public float jumpHeight = 2.5f;
     [HideInInspector]
-    public Vector3 jumpVelocity;
+    public bool isJumping = false;
+    bool jumpPressed = false;
+    public float gravityForce = -25f;
+    public float jumpHeight = 0.8f;
+    [HideInInspector]
+    public Vector3 verticalVelocity;
 
     [HideInInspector]
     public bool isCrouching = false;
-    public float crouchScaleY;
+    public float crouchScaleY = 0.35f;
 
     [HideInInspector]
     public bool isGrounded;
-    float groundDistance = 0.3f;
+    float groundDistance = 0.375f;
     public LayerMask groundMask;
+    float defaultStepOffset;
+
+    [HideInInspector]
+    public bool isSliding = false;
+    [HideInInspector]
+    public float slopeSpeed = 0;
+    RaycastHit slopeHit;
+    Vector3 slopeParallel;
+
+    private void Start()
+    {
+        defaultStepOffset = characterController.stepOffset;
+    }
 
     // Update is called once per frame
     void Update()
@@ -41,7 +57,7 @@ public class PlayerMovement : MonoBehaviour
         isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
 
         //Movement logic 
-        if (Input.GetAxis("Horizontal") != 0 || Input.GetAxis("Vertical") != 0)
+        if ((Input.GetAxis("Horizontal") != 0 || Input.GetAxis("Vertical") != 0))
         {
             MovePlayer();
             StepSound();
@@ -60,7 +76,7 @@ public class PlayerMovement : MonoBehaviour
         }
 
         //Jumping logic
-        if (Input.GetButtonDown("Jump") && isGrounded && !isCrouching)
+        if (Input.GetButtonDown("Jump") && isGrounded && !isCrouching && !isSliding)
         {
             Jump();
         }
@@ -73,17 +89,53 @@ public class PlayerMovement : MonoBehaviour
     {
         if (!isGrounded)
         {
-            jumpVelocity.y += gravityForce * Time.deltaTime;
+            verticalVelocity.y += gravityForce * Time.deltaTime;
+            if (jumpPressed)
+            {
+                isJumping = true;
+            }
         }
         else
         {
-            if (jumpVelocity.y < 0f)
+            if (verticalVelocity.y < 0f)
             {
-                jumpVelocity.y = -4f;
+                verticalVelocity.y = -4f;
+            }
+
+            SlopeSlide();
+
+            if (isJumping)
+            {
+                characterController.stepOffset = defaultStepOffset;
+                jumpPressed = false;
+                isJumping = false;
             }
         }
 
-        characterController.Move(jumpVelocity * Time.deltaTime);
+        characterController.Move(verticalVelocity * Time.deltaTime);
+    }
+
+    private void SlopeSlide()
+    {
+        Physics.Raycast(playerBody.position, Vector3.down, out slopeHit, 1f);
+        Vector3 n = slopeHit.normal;
+
+        Vector3 groundParallel = Vector3.Cross(playerBody.up, n);
+        slopeParallel = Vector3.Cross(groundParallel, n);
+
+        float currentSlope = Mathf.Round(Vector3.Angle(n, playerBody.up));
+
+        if (currentSlope > characterController.slopeLimit && isGrounded && (slopeHit.collider.gameObject.layer == LayerMask.NameToLayer("Slope")))
+        {
+            slopeSpeed += Time.deltaTime * (slopeParallel.magnitude + (isSliding ? 0f : (moveVelocity.magnitude * 80f))) * 12f;
+            characterController.Move(slopeParallel * slopeSpeed * Time.deltaTime);
+            isSliding = true;
+        }
+        else
+        {
+            slopeSpeed = 0;
+            isSliding = false;
+        }
     }
 
     void MovePlayer()
@@ -113,7 +165,13 @@ public class PlayerMovement : MonoBehaviour
             isRunning = false;
         }
 
-        if (isGrounded || isCrouching)
+        if (isSliding)
+        {
+            x = 0;
+            z = 0;
+        }
+
+        if (isGrounded)
         {
             moveVelocity = playerBody.right * x + playerBody.forward * z;
         }
@@ -124,12 +182,15 @@ public class PlayerMovement : MonoBehaviour
             playerSpeed *= 0.75f;
         }
 
+
         characterController.Move(moveVelocity * playerSpeed * Time.deltaTime);
     }
 
     void Jump()
     {
-        jumpVelocity.y = Mathf.Sqrt(jumpHeight * -1f * gravityForce);
+        characterController.stepOffset = 0f;
+        verticalVelocity.y = Mathf.Sqrt(jumpHeight * -1f * gravityForce);
+        jumpPressed = true;
     }
 
     void Crouch()
@@ -145,9 +206,9 @@ public class PlayerMovement : MonoBehaviour
             RaycastHit hit;
             ray.origin = playerBody.position;
             ray.direction = Vector3.up;
-            if (!Physics.Raycast(ray, out hit, 1.7f))
+            if (!Physics.Raycast(ray, out hit, 1.025f))
             {
-                playerBody.localScale = new Vector3(playerBody.localScale.x, 1.1f, playerBody.localScale.z);
+                playerBody.localScale = new Vector3(playerBody.localScale.x, 0.7f, playerBody.localScale.z);
                 isCrouching = false;
             }
         }
