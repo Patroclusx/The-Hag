@@ -325,7 +325,7 @@ MonoBehaviour:
   m_AreaLightEmissiveMeshShadowCastingMode: 0
   m_AreaLightEmissiveMeshMotionVectorGenerationMode: 0
   m_AreaLightEmissiveMeshLayer: -1
---- !u!1001 &358427343
+--- !u!1001 &479190022
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
@@ -335,7 +335,7 @@ PrefabInstance:
     - target: {fileID: 1888782782682934728, guid: 6989e4536a7e36e4395437d38c94cf90,
         type: 3}
       propertyPath: m_Name
-      value: LevelLoader
+      value: SceneLoader
       objectReference: {fileID: 0}
     - target: {fileID: 1888782782682934729, guid: 6989e4536a7e36e4395437d38c94cf90,
         type: 3}
@@ -390,21 +390,6 @@ PrefabInstance:
     - target: {fileID: 1888782782682934729, guid: 6989e4536a7e36e4395437d38c94cf90,
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2562838238107774960, guid: 6989e4536a7e36e4395437d38c94cf90,
-        type: 3}
-      propertyPath: m_Alpha
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2562838238107774960, guid: 6989e4536a7e36e4395437d38c94cf90,
-        type: 3}
-      propertyPath: m_Interactable
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2562838238107774960, guid: 6989e4536a7e36e4395437d38c94cf90,
-        type: 3}
-      propertyPath: m_BlocksRaycasts
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []

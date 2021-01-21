@@ -6,7 +6,7 @@ public class IntroEnd : MonoBehaviour
 {
     public SceneLoader sceneLoader;
 
-    public void endIntro()
+    void endIntro()
     {
         sceneLoader.LoadNextScene();
     }
