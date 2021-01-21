@@ -5,11 +5,10 @@ using UnityEngine;
 public class MainMenu : MonoBehaviour
 {
     public SceneLoader sceneLoader;
-    public AudioSource musicSource;
 
     public void startGame()
     {
-        musicSource.Stop();
+        FindObjectOfType<AudioManager>().playSound("StartGame");
         sceneLoader.LoadNextScene();
     }
 }
