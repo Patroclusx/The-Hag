@@ -586,6 +586,16 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1529449330274610178, guid: 6989e4536a7e36e4395437d38c94cf90,
         type: 3}
+      propertyPath: mainCamera
+      value: 
+      objectReference: {fileID: 996911523}
+    - target: {fileID: 1529449330274610178, guid: 6989e4536a7e36e4395437d38c94cf90,
+        type: 3}
+      propertyPath: menuCamera
+      value: 
+      objectReference: {fileID: 996911523}
+    - target: {fileID: 1529449330274610178, guid: 6989e4536a7e36e4395437d38c94cf90,
+        type: 3}
       propertyPath: musicSource
       value: 
       objectReference: {fileID: 1236720968}
@@ -994,6 +1004,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   sceneLoader: {fileID: 479190023}
+  mainCamera: {fileID: 0}
 --- !u!1 &923679758
 GameObject:
   m_ObjectHideFlags: 0
@@ -2116,9 +2127,19 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3521290486244853466, guid: ccf2c609d85fd6349851012b8a9fa317,
         type: 3}
+      propertyPath: sounds.Array.data[0].name
+      value: StartGame
+      objectReference: {fileID: 0}
+    - target: {fileID: 3521290486244853466, guid: ccf2c609d85fd6349851012b8a9fa317,
+        type: 3}
       propertyPath: sounds.Array.data[0].volume
       value: 0.05
       objectReference: {fileID: 0}
+    - target: {fileID: 3521290486244853466, guid: ccf2c609d85fd6349851012b8a9fa317,
+        type: 3}
+      propertyPath: sounds.Array.data[0].audioClip
+      value: 
+      objectReference: {fileID: 8300000, guid: f4c60a38bd3f437408e6c46a827244bc, type: 3}
     - target: {fileID: 3521290486244853467, guid: ccf2c609d85fd6349851012b8a9fa317,
         type: 3}
       propertyPath: m_RootOrder

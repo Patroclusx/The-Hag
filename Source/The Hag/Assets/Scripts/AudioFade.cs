@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class AudioFadeOut : MonoBehaviour
+public class AudioFade : MonoBehaviour
 {
     public static IEnumerator FadeOut(AudioSource audioSource, float FadeTime)
     {
