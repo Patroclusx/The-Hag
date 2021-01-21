@@ -12,7 +12,10 @@ public class SceneLoader : MonoBehaviour
     {
         if (Input.GetButtonDown("Submit") || Input.GetButton("Jump"))
         {
-            LoadNextScene();
+            if (SceneManager.GetActiveScene().buildIndex == 0)
+            {
+                LoadNextScene();
+            }
         }
     }
 
