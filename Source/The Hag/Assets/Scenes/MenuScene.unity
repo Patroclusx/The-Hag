@@ -5032,7 +5032,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   sceneLoader: {fileID: 479190023}
-  mainCamera: {fileID: 0}
+  menuCamera: {fileID: 996911523}
+  menuCanvas: {fileID: 1106553283}
 --- !u!1 &996911521
 GameObject:
   m_ObjectHideFlags: 0
@@ -6317,7 +6318,7 @@ PrefabInstance:
     - target: {fileID: 3521290486244853466, guid: ccf2c609d85fd6349851012b8a9fa317,
         type: 3}
       propertyPath: sounds.Array.data[0].volume
-      value: 0.1
+      value: 0.15
       objectReference: {fileID: 0}
     - target: {fileID: 3521290486244853466, guid: ccf2c609d85fd6349851012b8a9fa317,
         type: 3}
