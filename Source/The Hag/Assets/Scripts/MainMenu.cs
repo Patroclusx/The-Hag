@@ -5,15 +5,28 @@ using UnityEngine;
 public class MainMenu : MonoBehaviour
 {
     public SceneLoader sceneLoader;
+    public AudioManager audioManager;
     public Camera menuCamera;
     public Canvas menuCanvas;
 
     public void startGame()
     {
+        AudioManager audioManager = FindObjectOfType<AudioManager>();
+
         menuCanvas.enabled = false;
         StartCoroutine(ModifyFov(8f));
-        FindObjectOfType<AudioManager>().playSound("StartGame");
+        audioManager.playSound("StartGame");
         sceneLoader.LoadNextScene();
+    }
+    public void openSettings()
+    {
+
+    }
+
+    public void exitGame()
+    {
+        Debug.Log("Bazsy Buzsy!");
+        Application.Quit();
     }
 
     IEnumerator ModifyFov(float fovSpeed)

@@ -2,7 +2,7 @@
 using UnityEngine;
 
 [System.Serializable]
-public class Sound
+public class Audio
 {
     public string name;
 
@@ -13,6 +13,7 @@ public class Sound
     [Range(0.1f, 3f)]
     public float pitch;
     public bool loop;
+    public bool playOnAwake;
 
     [HideInInspector]
     public AudioSource source;

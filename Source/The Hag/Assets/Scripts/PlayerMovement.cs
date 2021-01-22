@@ -7,6 +7,7 @@ public class PlayerMovement : MonoBehaviour
     public Transform playerBody;
     public CharacterController characterController;
     public Transform groundCheck;
+    public AudioManager audioManager;
 
     [HideInInspector]
     public float playerSpeed;
@@ -216,9 +217,9 @@ public class PlayerMovement : MonoBehaviour
 
     void StepSound()
     {
-        if (isGrounded && moveVelocity.magnitude > 0.6f && !GetComponent<AudioSource>().isPlaying)
+        if (isGrounded && moveVelocity.magnitude > 0.6f)
         {
-            GetComponent<AudioSource>().Play();
+            audioManager.playSound("Step");
         }
     }
 }

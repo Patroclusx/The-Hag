@@ -5,7 +5,7 @@ using UnityEngine.SceneManagement;
 public class SceneLoader : MonoBehaviour
 {
     public Animator transition;
-    public AudioSource musicSource;
+    public AudioManager audioManager;
 
     // Update is called once per frame
     void Update()
@@ -21,7 +21,7 @@ public class SceneLoader : MonoBehaviour
 
     public void LoadNextScene()
     {
-        StartCoroutine(AudioFade.FadeOut(musicSource, 2.5f));
+        audioManager.fadeOutAllAudio(2.5f);
         StartCoroutine(LoadLevel(SceneManager.GetActiveScene().buildIndex + 1));
     }
 
@@ -29,7 +29,7 @@ public class SceneLoader : MonoBehaviour
     {
         transition.SetTrigger("EndFade");
 
-        yield return new WaitForSeconds(5f);
+        yield return new WaitForSeconds(4f);
 
         SceneManager.LoadScene(index);
     }
