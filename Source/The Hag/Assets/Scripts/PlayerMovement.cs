@@ -46,6 +46,8 @@ public class PlayerMovement : MonoBehaviour
     RaycastHit slopeHit;
     Vector3 slopeParallel;
 
+    List<GameObject> unityGameObjects = new List<GameObject>();
+
     private void Start()
     {
         defaultStepOffset = characterController.stepOffset;
@@ -217,9 +219,12 @@ public class PlayerMovement : MonoBehaviour
 
     void StepSound()
     {
-        if (isGrounded && moveVelocity.magnitude > 0.6f)
+        if (isGrounded && moveVelocity.magnitude > 0.3f)
         {
-            audioManager.playSound("Step");
+            if (!AudioFrequency.getInstance("player_step", gameObject).isWaiting(0.65f))
+            {
+                audioManager.playCollectionSound("Sound_Step_Walk_Dirt");
+            }
         }
     }
 }
