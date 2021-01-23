@@ -3,6 +3,7 @@ using System.Collections;
 using System;
 using UnityEngine;
 
+
 public class AudioManager : MonoBehaviour
 {
     public Audio[] musics;

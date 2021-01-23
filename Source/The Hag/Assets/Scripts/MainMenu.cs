@@ -11,8 +11,6 @@ public class MainMenu : MonoBehaviour
 
     public void startGame()
     {
-        AudioManager audioManager = FindObjectOfType<AudioManager>();
-
         menuCanvas.enabled = false;
         StartCoroutine(ModifyFov(8f));
         audioManager.playSound("StartGame");

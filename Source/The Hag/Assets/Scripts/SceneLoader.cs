@@ -7,15 +7,19 @@ public class SceneLoader : MonoBehaviour
     public Animator transition;
     public AudioManager audioManager;
 
+    bool isSkipped = false;
+
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetButtonDown("Submit") || Input.GetButton("Jump"))
+        if (Input.GetButtonDown("Jump") && !isSkipped)
         {
             if (SceneManager.GetActiveScene().buildIndex == 0)
             {
                 LoadNextScene();
             }
+
+            isSkipped = true;
         }
     }
 

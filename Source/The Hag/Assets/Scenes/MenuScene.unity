@@ -5092,7 +5092,7 @@ MonoBehaviour:
   - name: StartGame
     audioClip: {fileID: 8300000, guid: 1d26ad1aed5731b439cfc9f4a471330d, type: 3}
     volume: 0.1
-    pitch: 1
+    pitch: 0.8
     loop: 0
     playOnAwake: 0
     source: {fileID: 0}
