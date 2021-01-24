@@ -73,7 +73,11 @@ public class AudioManager : MonoBehaviour
 
         if(s != null)
         {
-            if ((!s.source.isPlaying || canOverlap) && !s.source.loop)
+            if(s.source.loop && !s.source.isPlaying)
+            {
+                s.source.Play();
+            }
+            else if (!s.source.loop && (!s.source.isPlaying || canOverlap))
             {
                 s.source.PlayOneShot(s.audioClip);
             }
@@ -85,18 +89,21 @@ public class AudioManager : MonoBehaviour
     }
     public void playSound(string soundName, float frequencyInSeconds)
     {
-        Audio s = Array.Find(sounds, sound => sound.name == soundName);
+        if (!AudioFrequency.getInstance(soundName, gameObject).isWaiting(frequencyInSeconds))
+        {
+            Audio s = Array.Find(sounds, sound => sound.name == soundName);
 
-        if (s != null)
-        {
-            if ((!s.source.isPlaying || frequencyInSeconds>0f) && !s.source.loop)
+            if (s != null)
             {
-                s.source.PlayOneShot(s.audioClip);
+                if (!s.source.loop)
+                {
+                    s.source.PlayOneShot(s.audioClip);
+                }
             }
-        }
-        else
-        {
-            Debug.Log("Could not find sound to play: " + soundName);
+            else
+            {
+                Debug.Log("Could not find sound to play: " + soundName);
+            }
         }
     }
     public void stopSound(string soundName)
@@ -196,26 +203,11 @@ public class AudioManager : MonoBehaviour
         return false;
     }
 
-    public IEnumerator fadeOutAudio(string audioName, float fadeTime)
+    public IEnumerator fadeOutSound(string audioName, float fadeTime)
     {
-        Audio m = Array.Find(musics, sound => sound.name == audioName);
         Audio s = Array.Find(sounds, sound => sound.name == audioName);
 
-        if (m != null && m.source.isPlaying)
-        {
-            float startVolume = m.source.volume;
-
-            while (m.source.volume > 0)
-            {
-                m.source.volume -= startVolume * Time.deltaTime / fadeTime;
-
-                yield return null;
-            }
-
-            m.source.Stop();
-            m.source.volume = startVolume;
-        }
-        else if (s != null && s.source.isPlaying)
+        if (s != null && s.source.isPlaying)
         {
             float startVolume = s.source.volume;
 

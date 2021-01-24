@@ -1889,6 +1889,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   transition: {fileID: 297090171}
+  doorMask:
+    serializedVersion: 2
+    m_Bits: 0
 --- !u!95 &297090171
 Animator:
   serializedVersion: 3
@@ -1963,6 +1966,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   transition: {fileID: 297090176}
+  doorMask:
+    serializedVersion: 2
+    m_Bits: 0
 --- !u!95 &297090176
 Animator:
   serializedVersion: 3
@@ -2555,6 +2561,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   transition: {fileID: 297090218}
+  doorMask:
+    serializedVersion: 2
+    m_Bits: 0
 --- !u!95 &297090218
 Animator:
   serializedVersion: 3
@@ -2615,6 +2624,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   transition: {fileID: 297090222}
+  doorMask:
+    serializedVersion: 2
+    m_Bits: 0
 --- !u!95 &297090222
 Animator:
   serializedVersion: 3
@@ -2703,6 +2715,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   transition: {fileID: 297090228}
+  doorMask:
+    serializedVersion: 2
+    m_Bits: 0
 --- !u!95 &297090228
 Animator:
   serializedVersion: 3
@@ -3057,6 +3072,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   transition: {fileID: 297090253}
+  doorMask:
+    serializedVersion: 2
+    m_Bits: 0
 --- !u!95 &297090253
 Animator:
   serializedVersion: 3
@@ -3285,6 +3303,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   transition: {fileID: 297090269}
+  doorMask:
+    serializedVersion: 2
+    m_Bits: 0
 --- !u!95 &297090269
 Animator:
   serializedVersion: 3
@@ -3373,6 +3394,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   transition: {fileID: 297090275}
+  doorMask:
+    serializedVersion: 2
+    m_Bits: 0
 --- !u!95 &297090275
 Animator:
   serializedVersion: 3
@@ -3475,6 +3499,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   transition: {fileID: 297090282}
+  doorMask:
+    serializedVersion: 2
+    m_Bits: 0
 --- !u!95 &297090282
 Animator:
   serializedVersion: 3
@@ -3983,6 +4010,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   transition: {fileID: 297090318}
+  doorMask:
+    serializedVersion: 2
+    m_Bits: 0
 --- !u!95 &297090318
 Animator:
   serializedVersion: 3
@@ -4281,6 +4311,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   transition: {fileID: 297090339}
+  doorMask:
+    serializedVersion: 2
+    m_Bits: 0
 --- !u!95 &297090339
 Animator:
   serializedVersion: 3
