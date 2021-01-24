@@ -25,6 +25,12 @@ public class AudioFrequency : MonoBehaviour
 
     void Update()
     {
+        if (hasPlayed)
+        {
+            timeElapsedWhileMute = 0;
+            countFreq();
+        }
+
         timeElapsedWhileMute += Time.deltaTime;
 
         if(timeElapsedWhileMute > frequencyInSeconds)
@@ -57,9 +63,6 @@ public class AudioFrequency : MonoBehaviour
         }
         else 
         {
-            timeElapsedWhileMute = 0;
-            countFreq();
-
             return true; 
         }
     }

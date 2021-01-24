@@ -11,8 +11,8 @@ public class PlayerMovement : MonoBehaviour
 
     [HideInInspector]
     public float playerSpeed;
-    public float walkSpeed = 3f;
-    public float sprintSpeed = 5f;
+    public float walkSpeed = 2f;
+    public float sprintSpeed = 4f;
     [HideInInspector]
     public bool isWalking = false;
     [HideInInspector]
@@ -219,12 +219,21 @@ public class PlayerMovement : MonoBehaviour
 
     void StepSound()
     {
-        if (isGrounded && moveVelocity.magnitude > 0.3f)
+        if (isGrounded && moveVelocity.magnitude > 0.35f)
         {
-            if (!AudioFrequency.getInstance("player_step", gameObject).isWaiting(0.65f))
+            if (isWalking && isCrouching)
             {
-                audioManager.playCollectionSound("Sound_Step_Walk_Dirt");
+                audioManager.playCollectionSound("Sound_Step_Walk_Dirt", 0.95f, gameObject);
             }
+            else if (isWalking && !isCrouching)
+            {
+                audioManager.playCollectionSound("Sound_Step_Walk_Dirt", 0.7f, gameObject);
+            }
+            else if (isRunning)
+            {
+                audioManager.playCollectionSound("Sound_Step_Run_Dirt", 0.55f, gameObject);
+            }
+
         }
     }
 }

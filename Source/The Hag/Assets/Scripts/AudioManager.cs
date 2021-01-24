@@ -9,7 +9,6 @@ public class AudioManager : MonoBehaviour
     public Audio[] sounds;
     public AudioCollection[] soundCollections;
 
-    // Start is called before the first frame update
     void Awake()
     {
         foreach (Audio m in musics)
@@ -43,6 +42,7 @@ public class AudioManager : MonoBehaviour
 
                 sc.collectionSource[i].volume = sc.volume;
                 sc.collectionSource[i].pitch = sc.pitch;
+                sc.collectionSource[i].playOnAwake = false;
             }
         }
     }
@@ -83,6 +83,22 @@ public class AudioManager : MonoBehaviour
             Debug.Log("Could not find sound to play: " + soundName);
         }
     }
+    public void playSound(string soundName, float frequencyInSeconds)
+    {
+        Audio s = Array.Find(sounds, sound => sound.name == soundName);
+
+        if (s != null)
+        {
+            if ((!s.source.isPlaying || frequencyInSeconds>0f) && !s.source.loop)
+            {
+                s.source.PlayOneShot(s.audioClip);
+            }
+        }
+        else
+        {
+            Debug.Log("Could not find sound to play: " + soundName);
+        }
+    }
     public void stopSound(string soundName)
     {
         Audio s = Array.Find(sounds, sound => sound.name == soundName);
@@ -99,14 +115,24 @@ public class AudioManager : MonoBehaviour
         }
     }
 
-    public void playCollectionSound(string soundCollectionName)
+    public void playCollectionSound(string soundCollectionName, float frequencyInSeconds, GameObject gameObjectAttach)
     {
-        AudioCollection sc = Array.Find(soundCollections, sound => sound.collectionName == soundCollectionName);
+        if (!AudioFrequency.getInstance(gameObjectAttach.name + "_" + soundCollectionName, gameObjectAttach).isWaiting(frequencyInSeconds))
+        {
+            AudioCollection sc = Array.Find(soundCollections, sound => sound.collectionName == soundCollectionName);
 
-        int collectionLenght = sc.audioClips.Length;
-        int randomClip = UnityEngine.Random.Range(0, collectionLenght);
+            if (sc != null)
+            {
+                int collectionLenght = sc.audioClips.Length;
+                int randomClip = UnityEngine.Random.Range(0, collectionLenght);
 
-        sc.collectionSource[randomClip].PlayOneShot(sc.collectionSource[randomClip].clip);
+                sc.collectionSource[randomClip].PlayOneShot(sc.collectionSource[randomClip].clip);
+            }
+            else
+            {
+                Debug.Log("Could not find sound collection to play: " + soundCollectionName);
+            }
+        }
     }
 
     public void playMusic(string musicName)
