@@ -1,17 +1,18 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 [System.Serializable]
-public class AudioCollection
+public class AudioSound
 {
-    public string collectionName;
+    public string name;
 
-    public AudioClip[] audioClips;
+    public AudioClip audioClip;
 
     [Range(0f, 1f)]
     public float volume;
     [Range(0.1f, 3f)]
     public float pitch;
+    public bool loop;
+    public bool playOnAwake;
 
     [Header("3D settings (Ignore if 2D only sound)")]
     [Range(0f, 1f)]
@@ -20,7 +21,5 @@ public class AudioCollection
     public float maxDistance;
 
     [HideInInspector]
-    public List<AudioSource> collectionSources;
-    [HideInInspector]
-    public AudioSource lastSourcePlayed;
+    public AudioSource source;
 }

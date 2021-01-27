@@ -1,5 +1,4 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class MainMenu : MonoBehaviour
@@ -13,7 +12,7 @@ public class MainMenu : MonoBehaviour
     {
         menuCanvas.enabled = false;
         StartCoroutine(ModifyFov(8f));
-        audioManager.playSound("Sound_Startgame", false);
+        audioManager.playSound2D("Sound_StartGame", false, 0f);
         sceneLoader.LoadNextScene();
     }
     public void openSettings()

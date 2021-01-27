@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
@@ -221,17 +220,13 @@ public class PlayerMovement : MonoBehaviour
     {
         if (isGrounded && moveVelocity.magnitude > 0.35f)
         {
-            if (isWalking && isCrouching)
+            if (isWalking && !isCrouching)
             {
-                audioManager.playCollectionSound("Sound_Step_Walk_Dirt", 0.95f, gameObject);
-            }
-            else if (isWalking && !isCrouching)
-            {
-                audioManager.playCollectionSound("Sound_Step_Walk_Dirt", 0.7f, gameObject);
+                audioManager.playCollectionSound3D("Sound_Step_Walk_Dirt", true, 0.45f, gameObject);
             }
             else if (isRunning)
             {
-                audioManager.playCollectionSound("Sound_Step_Run_Dirt", 0.55f, gameObject);
+                audioManager.playCollectionSound3D("Sound_Step_Run_Dirt", true, 0.275f, gameObject);
             }
 
         }

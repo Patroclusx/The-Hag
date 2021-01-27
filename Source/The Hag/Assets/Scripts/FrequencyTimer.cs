@@ -1,37 +1,36 @@
-﻿using System.Collections.Generic;
-using System;
+﻿using System;
 using UnityEngine;
 
-public class AudioFrequency : MonoBehaviour
+public class FrequencyTimer : MonoBehaviour
 {
     string ID;
     float frequencyInSeconds;
 
     float timeElapsedWhileMute = 0f;
     float frequencyCounter = 0f;
-    bool hasPlayed = false;
+    bool hasStarted = false;
 
-    public static AudioFrequency getInstance(string id, GameObject gameObject)
+    public static FrequencyTimer getInstance(string ID, GameObject gameObject)
     {
-        AudioFrequency af = Array.Find(gameObject.GetComponents<AudioFrequency>(), instance => instance.ID == id);
+        FrequencyTimer ft = Array.Find(gameObject.GetComponents<FrequencyTimer>(), instance => instance.ID == ID);
 
-        if (af == null)
+        if (ft == null)
         {
-            af = gameObject.AddComponent<AudioFrequency>();
-            af.ID = id;
+            ft = gameObject.AddComponent<FrequencyTimer>();
+            ft.ID = ID;
         }
-        return af;
+        return ft;
     }
 
     void Update()
     {
-        if (hasPlayed)
+        if (hasStarted)
         {
             timeElapsedWhileMute = 0;
             countFreq();
         }
 
-        timeElapsedWhileMute += Time.deltaTime;
+        timeElapsedWhileMute += Time.deltaTime * 0.85f;
 
         if(timeElapsedWhileMute > frequencyInSeconds)
         {
@@ -43,21 +42,21 @@ public class AudioFrequency : MonoBehaviour
     {
         if(frequencyCounter < frequencyInSeconds)
         {
-            frequencyCounter += Time.deltaTime / frequencyInSeconds;
+            frequencyCounter += Time.deltaTime * 0.9f;
         }
         else
         {
             frequencyCounter = 0f;
-            hasPlayed = false;
+            hasStarted = false;
         }
     }
 
     public bool isWaiting(float frequencyInSeconds)
     {
-        if (!hasPlayed)
+        if (!hasStarted)
         {
             this.frequencyInSeconds = frequencyInSeconds;
-            hasPlayed = true;
+            hasStarted = true;
 
             return false;
         }

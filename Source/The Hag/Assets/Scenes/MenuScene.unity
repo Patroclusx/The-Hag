@@ -1889,6 +1889,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   transition: {fileID: 297090171}
+  doorObject: {fileID: 0}
   doorMask:
     serializedVersion: 2
     m_Bits: 0
@@ -1966,6 +1967,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   transition: {fileID: 297090176}
+  doorObject: {fileID: 0}
   doorMask:
     serializedVersion: 2
     m_Bits: 0
@@ -2561,6 +2563,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   transition: {fileID: 297090218}
+  doorObject: {fileID: 0}
   doorMask:
     serializedVersion: 2
     m_Bits: 0
@@ -2624,6 +2627,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   transition: {fileID: 297090222}
+  doorObject: {fileID: 0}
   doorMask:
     serializedVersion: 2
     m_Bits: 0
@@ -2715,6 +2719,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   transition: {fileID: 297090228}
+  doorObject: {fileID: 0}
   doorMask:
     serializedVersion: 2
     m_Bits: 0
@@ -3072,6 +3077,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   transition: {fileID: 297090253}
+  doorObject: {fileID: 0}
   doorMask:
     serializedVersion: 2
     m_Bits: 0
@@ -3303,6 +3309,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   transition: {fileID: 297090269}
+  doorObject: {fileID: 0}
   doorMask:
     serializedVersion: 2
     m_Bits: 0
@@ -3394,6 +3401,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   transition: {fileID: 297090275}
+  doorObject: {fileID: 0}
   doorMask:
     serializedVersion: 2
     m_Bits: 0
@@ -3499,6 +3507,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   transition: {fileID: 297090282}
+  doorObject: {fileID: 0}
   doorMask:
     serializedVersion: 2
     m_Bits: 0
@@ -4010,6 +4019,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   transition: {fileID: 297090318}
+  doorObject: {fileID: 0}
   doorMask:
     serializedVersion: 2
     m_Bits: 0
@@ -4311,6 +4321,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   transition: {fileID: 297090339}
+  doorObject: {fileID: 0}
   doorMask:
     serializedVersion: 2
     m_Bits: 0
@@ -5114,20 +5125,22 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   musics:
-  - name: Music_Mainmenu
+  - name: Music_MainMenu
     audioClip: {fileID: 8300000, guid: a204e317464b34743a7e03aee24e016a, type: 3}
-    volume: 0.25
+    volume: 0.6
     pitch: 1
     loop: 1
     playOnAwake: 1
     source: {fileID: 0}
   sounds:
-  - name: Sound_Startgame
+  - name: Sound_StartGame
     audioClip: {fileID: 8300000, guid: 1d26ad1aed5731b439cfc9f4a471330d, type: 3}
-    volume: 0.1
+    volume: 0.3
     pitch: 0.8
     loop: 0
     playOnAwake: 0
+    spatialBlend: 0
+    maxDistance: 0
     source: {fileID: 0}
   soundCollections: []
 --- !u!4 &972039537
