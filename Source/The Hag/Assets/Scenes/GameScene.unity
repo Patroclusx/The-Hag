@@ -6854,6 +6854,7 @@ GameObject:
   - component: {fileID: 1888771459}
   - component: {fileID: 1888771458}
   - component: {fileID: 1888771460}
+  - component: {fileID: 1888771461}
   m_Layer: 0
   m_Name: FPS Player
   m_TagString: Player
@@ -6911,15 +6912,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerBody: {fileID: 1888771459}
   characterController: {fileID: 1888771458}
+  playerStats: {fileID: 1888771461}
   groundCheck: {fileID: 781867149}
   audioManager: {fileID: 697980136462355020}
+  isWalking: 0
+  isRunning: 0
   playerSpeed: 0
   walkSpeed: 2
   sprintSpeed: 4
-  isWalking: 0
-  isRunning: 0
   moveVelocity: {x: 0, y: 0, z: 0}
   isJumping: 0
+  hasJumped: 0
   gravityForce: -25
   jumpHeight: 0.8
   verticalVelocity: {x: 0, y: 0, z: 0}
@@ -6931,6 +6934,24 @@ MonoBehaviour:
     m_Bits: 12288
   isSliding: 0
   slopeSpeed: 0
+--- !u!114 &1888771461
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1888771457}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8b4af05b43fb4a0408d56e560330d4ce, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  playerMovement: {fileID: 1888771460}
+  audioManager: {fileID: 697980136462355020}
+  playerStamina: 100
+  staminaChangeSpeed: 15
+  canRun: 1
+  canJump: 1
 --- !u!1 &1897218604 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8536203604665628201, guid: b78b5ffb972aace47a9e67d32641dded,
@@ -7687,6 +7708,39 @@ MonoBehaviour:
     - {fileID: 8300000, guid: 6a8e4ded52894d3469f0396e81151b32, type: 3}
     - {fileID: 8300000, guid: a04209d33f705ab4d9c643db8be597da, type: 3}
     volume: 0.3
+    pitch: 1
+    spatialBlend: 0
+    maxDistance: 0
+    collectionSources: []
+    lastSourcePlayed: {fileID: 0}
+  - collectionName: Sound_Player_Jump
+    audioClips:
+    - {fileID: 8300000, guid: 24fdc465c7225184d978f763efbd82ec, type: 3}
+    - {fileID: 8300000, guid: 640e83a3d6b823744bc2f14d06d46add, type: 3}
+    - {fileID: 8300000, guid: 66a951de3f6babc4c91760fc86b31d63, type: 3}
+    volume: 0.6
+    pitch: 1
+    spatialBlend: 0
+    maxDistance: 0
+    collectionSources: []
+    lastSourcePlayed: {fileID: 0}
+  - collectionName: Sound_Player_Crouch
+    audioClips:
+    - {fileID: 8300000, guid: 4acdb1af8f6aadb4f9083008890a2ca9, type: 3}
+    - {fileID: 8300000, guid: 2fd84037ffe4a2e4fbfa5916369ff1a0, type: 3}
+    - {fileID: 8300000, guid: 07dfee9bbc5cbf8488159985a16633a4, type: 3}
+    volume: 0.3
+    pitch: 1
+    spatialBlend: 0
+    maxDistance: 0
+    collectionSources: []
+    lastSourcePlayed: {fileID: 0}
+  - collectionName: Sound_Player_Breath
+    audioClips:
+    - {fileID: 8300000, guid: f87b8b0fe6633d348a816e4a0b13a7ee, type: 3}
+    - {fileID: 8300000, guid: 8e08b801cab168f4caf3bce62a337ac4, type: 3}
+    - {fileID: 8300000, guid: 48bd05099ae01664481fe7cc18242019, type: 3}
+    volume: 0.1
     pitch: 1
     spatialBlend: 0
     maxDistance: 0
