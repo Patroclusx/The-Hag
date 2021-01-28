@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
 
 public class DoorScript : MonoBehaviour
 {
@@ -7,21 +9,15 @@ public class DoorScript : MonoBehaviour
     public LayerMask doorMask;
     RaycastHit hitInfo;
 
-
     // Update is called once per frame
     void Update()
     {
-        if (Physics.Raycast(Camera.main.transform.position, Camera.main.transform.forward, out hitInfo, 1.1f, doorMask))
+        if (Physics.Raycast(Camera.main.transform.position, Camera.main.transform.forward, out hitInfo, 1.25f, doorMask))
         {
             if (Input.GetButtonDown("Fire1") && hitInfo.transform.gameObject.Equals(doorObject))
             {
-                if ((transition.GetCurrentAnimatorStateInfo(0).IsName("DefaultState") && transition.GetBool("isClosedByDefault")) || !transition.GetCurrentAnimatorStateInfo(0).IsName("DoorOpen"))
-                {
-                    transition.SetTrigger("setOpen");
-                }
-                else
-                {
-                    transition.SetTrigger("setClose");
+                if (transition.GetCurrentAnimatorStateInfo(0).IsName("DefaultState") || transition.GetCurrentAnimatorStateInfo(0).normalizedTime >= 1f){
+                    transition.SetBool("isOpened", !transition.GetBool("isOpened"));
                 }
             }
         }

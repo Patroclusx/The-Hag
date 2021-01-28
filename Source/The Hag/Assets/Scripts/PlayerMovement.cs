@@ -1,15 +1,17 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
     public Transform playerBody;
     public CharacterController characterController;
     public Transform groundCheck;
+    public AudioManager audioManager;
 
     [HideInInspector]
     public float playerSpeed;
-    public float walkSpeed = 3f;
-    public float sprintSpeed = 5f;
+    public float walkSpeed = 2f;
+    public float sprintSpeed = 4f;
     [HideInInspector]
     public bool isWalking = false;
     [HideInInspector]
@@ -28,7 +30,7 @@ public class PlayerMovement : MonoBehaviour
 
     [HideInInspector]
     public bool isCrouching = false;
-    public float crouchScaleY = 0.35f;
+    public float crouchHeight = 1.1f;
 
     [HideInInspector]
     public bool isGrounded;
@@ -42,6 +44,8 @@ public class PlayerMovement : MonoBehaviour
     public float slopeSpeed = 0;
     RaycastHit slopeHit;
     Vector3 slopeParallel;
+
+    List<GameObject> unityGameObjects = new List<GameObject>();
 
     private void Start()
     {
@@ -195,7 +199,8 @@ public class PlayerMovement : MonoBehaviour
     {
         if (!isCrouching)
         {
-            playerBody.localScale = new Vector3(playerBody.localScale.x, crouchScaleY, playerBody.localScale.z);
+            groundCheck.localPosition = new Vector3(0f, groundCheck.localPosition.y + (characterController.height - crouchHeight) / 2, 0f);
+            characterController.height = crouchHeight;
             isCrouching = true;
         }
         else
@@ -204,9 +209,10 @@ public class PlayerMovement : MonoBehaviour
             RaycastHit hit;
             ray.origin = playerBody.position;
             ray.direction = Vector3.up;
-            if (!Physics.Raycast(ray, out hit, 1.025f))
+            if (!Physics.Raycast(ray, out hit, characterController.height - 0.1f))
             {
-                playerBody.localScale = new Vector3(playerBody.localScale.x, 0.7f, playerBody.localScale.z);
+                groundCheck.localPosition = new Vector3(0f, -0.6f, 0f);
+                characterController.height = 2f;
                 isCrouching = false;
             }
         }
@@ -214,9 +220,17 @@ public class PlayerMovement : MonoBehaviour
 
     void StepSound()
     {
-        if (isGrounded && moveVelocity.magnitude > 0.6f && !GetComponent<AudioSource>().isPlaying)
+        if (isGrounded && moveVelocity.magnitude > 0.35f)
         {
-            GetComponent<AudioSource>().Play();
+            if (isWalking && !isCrouching)
+            {
+                audioManager.playCollectionSound3D("Sound_Step_Walk_Dirt", true, 0.45f, gameObject);
+            }
+            else if (isRunning)
+            {
+                audioManager.playCollectionSound3D("Sound_Step_Run_Dirt", true, 0.275f, gameObject);
+            }
+
         }
     }
 }
