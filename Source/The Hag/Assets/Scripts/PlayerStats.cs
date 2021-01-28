@@ -68,7 +68,7 @@ public class PlayerStats : MonoBehaviour
             //Stamina recover
             if (!playerMovement.isRunning && !playerMovement.isJumping)
             {
-                playerStamina += Time.deltaTime * (staminaSpeed * 0.8f);
+                playerStamina += Time.deltaTime * (staminaSpeed * 0.9f);
                 if (playerStamina > 100f)
                 {
                     playerStamina = 100f;
