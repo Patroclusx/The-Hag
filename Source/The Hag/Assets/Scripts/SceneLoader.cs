@@ -12,14 +12,19 @@ public class SceneLoader : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetButtonDown("Jump") && !isSkipped)
+        if (SceneManager.GetActiveScene().buildIndex == 0)
         {
-            if (SceneManager.GetActiveScene().buildIndex == 0)
+            Cursor.visible = false;
+
+            if (Input.GetButtonDown("Jump") && !isSkipped)
             {
                 LoadNextScene();
+                isSkipped = true;
             }
-
-            isSkipped = true;
+        }
+        else if(SceneManager.GetActiveScene().buildIndex == 1)
+        {
+            Cursor.visible = true;
         }
     }
 

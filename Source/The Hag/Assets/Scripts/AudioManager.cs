@@ -187,7 +187,7 @@ public class AudioManager : MonoBehaviour
                 randomSource = UnityEngine.Random.Range(0, collectionLenght);
             }
 
-            if (frequencyInSeconds == 0f || !FrequencyTimer.getInstance(gameObject.name + "_" + soundCollectionName, gameObject).isWaiting((canOverlap ? frequencyInSeconds : frequencyInSeconds + sc.collectionSources[randomSource].clip.length)))
+            if (frequencyInSeconds == 0f || !FrequencyTimer.getInstance(soundCollectionName, gameObject).isWaiting((canOverlap ? frequencyInSeconds : frequencyInSeconds + sc.collectionSources[randomSource].clip.length)))
             {
                 if (!canOverlap)
                 {
@@ -211,7 +211,7 @@ public class AudioManager : MonoBehaviour
             Debug.Log("Could not find sound collection to play: " + soundCollectionName);
         }
     }
-    public void playCollectionSound3D(string soundCollectionName,bool canOverlap, float frequencyInSeconds, GameObject gameObjectAttach)
+    public void playCollectionSound3D(string soundCollectionName, bool canOverlap, float frequencyInSeconds, GameObject gameObjectAttach)
     {
         AudioCollection sc = Array.Find(soundCollections, sound => sound.collectionName == soundCollectionName);
 
@@ -225,7 +225,7 @@ public class AudioManager : MonoBehaviour
                 randomSource = UnityEngine.Random.Range(0, collectionLenght);
             }
 
-            if (frequencyInSeconds == 0f || !FrequencyTimer.getInstance(gameObjectAttach.name + "_" + soundCollectionName, gameObjectAttach).isWaiting((canOverlap ? frequencyInSeconds : frequencyInSeconds + sc.collectionSources[randomSource].clip.length)))
+            if (frequencyInSeconds == 0f || !FrequencyTimer.getInstance(soundCollectionName, gameObjectAttach).isWaiting((canOverlap ? frequencyInSeconds : frequencyInSeconds + sc.collectionSources[randomSource].clip.length)))
             {
                 AudioSource objSC = Array.Find(gameObjectAttach.GetComponents<AudioSource>(), objSound => objSound.clip == sc.collectionSources[randomSource].clip);
 

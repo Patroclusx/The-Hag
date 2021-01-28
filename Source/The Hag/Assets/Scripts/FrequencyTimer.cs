@@ -12,12 +12,14 @@ public class FrequencyTimer : MonoBehaviour
 
     public static FrequencyTimer getInstance(string ID, GameObject gameObject)
     {
-        FrequencyTimer ft = Array.Find(gameObject.GetComponents<FrequencyTimer>(), instance => instance.ID == ID);
+        String prefixID = gameObject.name + "_";
+
+        FrequencyTimer ft = Array.Find(gameObject.GetComponents<FrequencyTimer>(), instance => instance.ID == prefixID+ID);
 
         if (ft == null)
         {
             ft = gameObject.AddComponent<FrequencyTimer>();
-            ft.ID = ID;
+            ft.ID = prefixID + ID;
         }
         return ft;
     }

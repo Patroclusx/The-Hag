@@ -5,24 +5,26 @@ public class PlayerMovement : MonoBehaviour
 {
     public Transform playerBody;
     public CharacterController characterController;
+    public PlayerStats playerStats;
     public Transform groundCheck;
     public AudioManager audioManager;
 
     [HideInInspector]
-    public float playerSpeed;
-    public float walkSpeed = 2f;
-    public float sprintSpeed = 4f;
-    [HideInInspector]
     public bool isWalking = false;
     [HideInInspector]
     public bool isRunning = false;
+    [HideInInspector]
+    public float playerSpeed;
+    public float walkSpeed = 2f;
+    public float sprintSpeed = 4f;
 
     [HideInInspector]
     public Vector3 moveVelocity;
 
     [HideInInspector]
     public bool isJumping = false;
-    bool jumpPressed = false;
+    [HideInInspector]
+    public bool hasJumped = false;
     public float gravityForce = -25f;
     public float jumpHeight = 0.8f;
     [HideInInspector]
@@ -78,9 +80,12 @@ public class PlayerMovement : MonoBehaviour
         }
 
         //Jumping logic
-        if (Input.GetButtonDown("Jump") && isGrounded && !isCrouching && !isSliding)
+        if (Input.GetButtonDown("Jump") && !hasJumped && !isCrouching && !isSliding)
         {
-            Jump();
+            if (playerStats.canJump)
+            {
+                Jump();
+            }
         }
 
         //Gravity logic
@@ -92,7 +97,7 @@ public class PlayerMovement : MonoBehaviour
         if (!isGrounded)
         {
             verticalVelocity.y += gravityForce * Time.deltaTime;
-            if (jumpPressed)
+            if (hasJumped)
             {
                 isJumping = true;
             }
@@ -109,7 +114,7 @@ public class PlayerMovement : MonoBehaviour
             if (isJumping)
             {
                 characterController.stepOffset = defaultStepOffset;
-                jumpPressed = false;
+                hasJumped = false;
                 isJumping = false;
             }
         }
@@ -146,7 +151,7 @@ public class PlayerMovement : MonoBehaviour
         float z = Input.GetAxis("Vertical");
 
         //Sprinting logic
-        if (Input.GetButton("Sprint") && z == 1 && !isCrouching)
+        if (Input.GetButton("Sprint") && z == 1 && !isCrouching && playerStats.canRun)
         {
             playerSpeed = sprintSpeed;
             isRunning = true;
@@ -192,7 +197,9 @@ public class PlayerMovement : MonoBehaviour
     {
         characterController.stepOffset = 0f;
         verticalVelocity.y = Mathf.Sqrt(jumpHeight * -1f * gravityForce);
-        jumpPressed = true;
+        hasJumped = true;
+
+        audioManager.playCollectionSound3D("Sound_Player_Jump", true, 0f, gameObject);
     }
 
     void Crouch()
@@ -216,6 +223,8 @@ public class PlayerMovement : MonoBehaviour
                 isCrouching = false;
             }
         }
+
+        audioManager.playCollectionSound2D("Sound_Player_Crouch", true, 0f);
     }
 
     void StepSound()
