@@ -7,6 +7,10 @@ public class PlayerStats : MonoBehaviour
     public PlayerMovement playerMovement;
     public AudioManager audioManager;
 
+    //Interaction
+    public static bool canInteract = true;
+    public static float reachDistance = 1f;
+
     //Stamina
     public float playerStamina = 100f;
     public float staminaChangeSpeed = 15f;

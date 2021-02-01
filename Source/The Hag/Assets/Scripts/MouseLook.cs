@@ -6,6 +6,8 @@ public class MouseLook : MonoBehaviour
     public float mouseSens = 1f;
     public Transform playerBody;
 
+    [HideInInspector]
+    public bool isEnabled = true;
     float xRotation = 0f;
 
     // Start is called before the first frame update
@@ -17,6 +19,14 @@ public class MouseLook : MonoBehaviour
 
     // Update is called once per frame
     void Update()
+    {
+        if (isEnabled)
+        {
+            mouseLook();
+        }
+    }
+
+    void mouseLook()
     {
         //Looking logic
         float mouseX = Input.GetAxis("Mouse X") * mouseSens;

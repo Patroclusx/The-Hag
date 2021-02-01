@@ -58,7 +58,7 @@ public class PlayerMovement : MonoBehaviour
     void Update()
     {
         //Ground check logic
-        isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
+        isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask, QueryTriggerInteraction.Ignore);
 
         //Movement logic 
         if ((Input.GetAxis("Horizontal") != 0 || Input.GetAxis("Vertical") != 0))
@@ -124,7 +124,7 @@ public class PlayerMovement : MonoBehaviour
 
     private void SlopeSlide()
     {
-        Physics.Raycast(playerBody.position, Vector3.down, out slopeHit, 1f);
+        Physics.Raycast(playerBody.position, Vector3.down, out slopeHit, 1f, -1, QueryTriggerInteraction.Ignore);
         Vector3 n = slopeHit.normal;
 
         Vector3 groundParallel = Vector3.Cross(playerBody.up, n);
@@ -136,10 +136,15 @@ public class PlayerMovement : MonoBehaviour
         {
             slopeSpeed += Time.deltaTime * (slopeParallel.magnitude + (isSliding ? 0f : (moveVelocity.magnitude * 80f))) * 12f;
             characterController.Move(slopeParallel * slopeSpeed * Time.deltaTime);
+            audioManager.playSound3D("Sound_Player_Slide", false, 0f, gameObject);
             isSliding = true;
         }
         else
         {
+            if (isSliding)
+            {
+                audioManager.fadeOutSound3D("Sound_Player_Slide", 0.35f, gameObject);
+            }
             slopeSpeed = 0;
             isSliding = false;
         }
@@ -195,11 +200,18 @@ public class PlayerMovement : MonoBehaviour
 
     void Jump()
     {
-        characterController.stepOffset = 0f;
-        verticalVelocity.y = Mathf.Sqrt(jumpHeight * -1f * gravityForce);
-        hasJumped = true;
+        Ray ray = new Ray();
+        RaycastHit hit;
+        ray.origin = playerBody.position;
+        ray.direction = Vector3.up;
+        if (!Physics.Raycast(ray, out hit, characterController.height - 1.2f, -1, QueryTriggerInteraction.Ignore))
+        {
+            characterController.stepOffset = 0f;
+            verticalVelocity.y = Mathf.Sqrt(jumpHeight * -1f * gravityForce);
+            hasJumped = true;
 
-        audioManager.playCollectionSound3D("Sound_Player_Jump", true, 0f, gameObject);
+            audioManager.playCollectionSound3D("Sound_Player_Jump", true, 0f, gameObject);
+        }
     }
 
     void Crouch()
@@ -209,6 +221,8 @@ public class PlayerMovement : MonoBehaviour
             groundCheck.localPosition = new Vector3(0f, groundCheck.localPosition.y + (characterController.height - crouchHeight) / 2, 0f);
             characterController.height = crouchHeight;
             isCrouching = true;
+
+            audioManager.playCollectionSound2D("Sound_Player_Crouch", true, 0f);
         }
         else
         {
@@ -216,15 +230,15 @@ public class PlayerMovement : MonoBehaviour
             RaycastHit hit;
             ray.origin = playerBody.position;
             ray.direction = Vector3.up;
-            if (!Physics.Raycast(ray, out hit, characterController.height - 0.1f))
+            if (!Physics.Raycast(ray, out hit, characterController.height - 0.1f, -1, QueryTriggerInteraction.Ignore))
             {
                 groundCheck.localPosition = new Vector3(0f, -0.6f, 0f);
                 characterController.height = 2f;
                 isCrouching = false;
+
+                audioManager.playCollectionSound2D("Sound_Player_Crouch", true, 0f);
             }
         }
-
-        audioManager.playCollectionSound2D("Sound_Player_Crouch", true, 0f);
     }
 
     void StepSound()

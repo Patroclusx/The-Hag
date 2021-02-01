@@ -93,7 +93,7 @@ public class AudioManager : MonoBehaviour
 
         if (s != null)
         {
-            if (frequencyInSeconds == 0f || !FrequencyTimer.getInstance(soundName, gameObject).isWaiting((canOverlap ? frequencyInSeconds : frequencyInSeconds + s.audioClip.length)))
+            if (frequencyInSeconds == 0f || FrequencyTimer.getInstance(soundName, gameObject).isStartPhase((canOverlap ? frequencyInSeconds : frequencyInSeconds + s.audioClip.length)))
             {
                 if (!canOverlap)
                 {
@@ -126,7 +126,7 @@ public class AudioManager : MonoBehaviour
 
         if (s != null)
         {
-            if (frequencyInSeconds == 0f || !FrequencyTimer.getInstance(soundName, gameObjectAttach).isWaiting((canOverlap ? frequencyInSeconds : frequencyInSeconds + s.audioClip.length)))
+            if (frequencyInSeconds == 0f || FrequencyTimer.getInstance(soundName, gameObjectAttach).isStartPhase((canOverlap ? frequencyInSeconds : frequencyInSeconds + s.audioClip.length)))
             {
                 AudioSource objS = Array.Find(gameObjectAttach.GetComponents<AudioSource>(), objSound => objSound.clip == s.source.clip);
 
@@ -187,7 +187,7 @@ public class AudioManager : MonoBehaviour
                 randomSource = UnityEngine.Random.Range(0, collectionLenght);
             }
 
-            if (frequencyInSeconds == 0f || !FrequencyTimer.getInstance(soundCollectionName, gameObject).isWaiting((canOverlap ? frequencyInSeconds : frequencyInSeconds + sc.collectionSources[randomSource].clip.length)))
+            if (frequencyInSeconds == 0f || FrequencyTimer.getInstance(soundCollectionName, gameObject).isStartPhase((canOverlap ? frequencyInSeconds : frequencyInSeconds + sc.collectionSources[randomSource].clip.length)))
             {
                 if (!canOverlap)
                 {
@@ -225,7 +225,7 @@ public class AudioManager : MonoBehaviour
                 randomSource = UnityEngine.Random.Range(0, collectionLenght);
             }
 
-            if (frequencyInSeconds == 0f || !FrequencyTimer.getInstance(soundCollectionName, gameObjectAttach).isWaiting((canOverlap ? frequencyInSeconds : frequencyInSeconds + sc.collectionSources[randomSource].clip.length)))
+            if (frequencyInSeconds == 0f || FrequencyTimer.getInstance(soundCollectionName, gameObjectAttach).isStartPhase((canOverlap ? frequencyInSeconds : frequencyInSeconds + sc.collectionSources[randomSource].clip.length)))
             {
                 AudioSource objSC = Array.Find(gameObjectAttach.GetComponents<AudioSource>(), objSound => objSound.clip == sc.collectionSources[randomSource].clip);
 
