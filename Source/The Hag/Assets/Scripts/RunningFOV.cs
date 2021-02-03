@@ -23,7 +23,10 @@ public class RunningFOV : MonoBehaviour
         }
         else
         {
-            mainCamera.fieldOfView = Mathf.Lerp(mainCamera.fieldOfView, defaultFov, distortionSensitivity);
+            if (mainCamera.fieldOfView > 60.01f)
+            {
+                mainCamera.fieldOfView = Mathf.Lerp(mainCamera.fieldOfView, defaultFov, distortionSensitivity);
+            }
         }
     }
 }

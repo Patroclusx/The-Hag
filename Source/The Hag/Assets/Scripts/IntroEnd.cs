@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class IntroEnd : MonoBehaviour
 {
@@ -6,6 +7,9 @@ public class IntroEnd : MonoBehaviour
 
     void endIntro()
     {
-        sceneLoader.LoadNextScene();
+        if (SceneManager.GetActiveScene().buildIndex == 0)
+        {
+            sceneLoader.LoadNextScene();
+        }
     }
 }

@@ -7,11 +7,6 @@ public class Crosshair : MonoBehaviour
     public GameObject crosshair;
     public GameObject crosshairHand;
 
-    void Start()
-    {
-      
-    }
-
     // Update is called once per frame
     void Update()
     {
@@ -19,7 +14,7 @@ public class Crosshair : MonoBehaviour
 
         if (Physics.Raycast(Camera.main.transform.position, Camera.main.transform.forward, out hitInfo, PlayerStats.reachDistance, -1, QueryTriggerInteraction.Ignore))
         {
-            if (hitInfo.transform.tag == "Interactable")
+            if (hitInfo.transform.tag == "Interactable" && PlayerStats.canInteract)
             {
                 crosshairHand.SetActive(true);
                 crosshair.SetActive(false);

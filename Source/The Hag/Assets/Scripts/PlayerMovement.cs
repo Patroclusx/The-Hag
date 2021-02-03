@@ -47,8 +47,6 @@ public class PlayerMovement : MonoBehaviour
     RaycastHit slopeHit;
     Vector3 slopeParallel;
 
-    List<GameObject> unityGameObjects = new List<GameObject>();
-
     private void Start()
     {
         defaultStepOffset = characterController.stepOffset;
@@ -74,13 +72,13 @@ public class PlayerMovement : MonoBehaviour
         }
 
         //Crouching logic
-        if (Input.GetButtonDown("Crouch") /**&& Input.GetButtonUp("Crouch")**/ && isGrounded)
+        if (Input.GetKeyDown(KeyCode.LeftControl) /**&& Input.GetButtonUp("Crouch")**/ && isGrounded)
         {
             Crouch();
         }
 
         //Jumping logic
-        if (Input.GetButtonDown("Jump") && !hasJumped && !isCrouching && !isSliding)
+        if (Input.GetKeyDown(KeyCode.Space) && !hasJumped && !isCrouching && !isSliding)
         {
             if (playerStats.canJump)
             {
@@ -156,7 +154,7 @@ public class PlayerMovement : MonoBehaviour
         float z = Input.GetAxis("Vertical");
 
         //Sprinting logic
-        if (Input.GetButton("Sprint") && z == 1 && !isCrouching && playerStats.canRun)
+        if (Input.GetKey(KeyCode.LeftShift) && z == 1 && !isCrouching && playerStats.canRun)
         {
             playerSpeed = sprintSpeed;
             isRunning = true;

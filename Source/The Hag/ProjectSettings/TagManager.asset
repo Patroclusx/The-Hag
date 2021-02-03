@@ -16,8 +16,8 @@ TagManager:
   - 
   - FPS
   - Player
-  - 
-  - 
+  - Item
+  - Object
   - Ground
   - Slope
   - Door

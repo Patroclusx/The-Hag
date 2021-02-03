@@ -8,12 +8,20 @@ public class PlayerStats : MonoBehaviour
     public AudioManager audioManager;
 
     //Interaction
+    [System.NonSerialized]
     public static bool canInteract = true;
-    public static float reachDistance = 1f;
+    [System.NonSerialized]
+    public static float reachDistance = 1.2f;
+    [System.NonSerialized]
+    public static float throwForce = 180f;
 
     //Stamina
+    public bool isStaminaDrainEnabled = true;
     public float playerStamina = 100f;
     public float staminaChangeSpeed = 15f;
+    public float adrenalineModifier = 2f;
+    [HideInInspector]
+    public bool isAdrenalineOn = false;
     [HideInInspector]
     public bool canRun = true;
     [HideInInspector]
@@ -28,7 +36,12 @@ public class PlayerStats : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        handleStamina(staminaChangeSpeed);
+        float staminaSpeed = staminaChangeSpeed;
+        if (isAdrenalineOn)
+        {
+            staminaSpeed = staminaChangeSpeed / adrenalineModifier;
+        }
+        handleStamina(staminaSpeed);
     }
 
     void handleStamina(float staminaSpeed)
@@ -38,32 +51,35 @@ public class PlayerStats : MonoBehaviour
             audioManager.playCollectionSound2D("Sound_Player_Breath", false, 0f);
         }
 
-        if (playerMovement.isRunning && canRun)
+        if (isStaminaDrainEnabled)
         {
-            if (playerStamina > 0f)
+            if (playerMovement.isRunning && canRun)
             {
-                if (!playerMovement.isJumping)
+                if (playerStamina > 0f)
                 {
-                    playerStamina -= Time.deltaTime * staminaSpeed;
+                    if (!playerMovement.isJumping)
+                    {
+                        playerStamina -= Time.deltaTime * staminaSpeed;
+                    }
+                }
+                else
+                {
+                    playerStamina = 0f;
+                    canRun = false;
                 }
             }
-            else
+            if (playerMovement.isJumping && canJump)
             {
-                playerStamina = 0f;
-                canRun = false;
-            }
-        }
-        if (playerMovement.isJumping && canJump)
-        {
-            if (playerStamina >= 10f)
-            {
-                playerStamina -= 10f;
-                canJump = false;
-            }
-            else
-            {
-                playerStamina = 0f;
-                canJump = false;
+                if (playerStamina >= 10f)
+                {
+                    playerStamina -= staminaSpeed;
+                    canJump = false;
+                }
+                else
+                {
+                    playerStamina = 0f;
+                    canJump = false;
+                }
             }
         }
 
@@ -72,7 +88,7 @@ public class PlayerStats : MonoBehaviour
             //Stamina recover
             if (!playerMovement.isRunning && !playerMovement.isJumping)
             {
-                playerStamina += Time.deltaTime * (staminaSpeed * 0.9f);
+                playerStamina += Time.deltaTime * staminaChangeSpeed * adrenalineModifier;
                 if (playerStamina > 100f)
                 {
                     playerStamina = 100f;
@@ -80,13 +96,13 @@ public class PlayerStats : MonoBehaviour
             }
 
             //Run recover
-            if (playerStamina >= 30f && !playerMovement.isRunning)
+            if (playerStamina >= staminaSpeed * 2f && !playerMovement.isRunning)
             {
                 canRun = true;
             }
 
             //Jump recover
-            if (playerStamina >= 10f && !playerMovement.isJumping)
+            if (playerStamina >= staminaSpeed && !playerMovement.isJumping)
             {
                 canJump = true;
             }
