@@ -668,6 +668,7 @@ PlayerSettings:
       daydreamIconForeground: {fileID: 0}
       daydreamIconBackground: {fileID: 0}
   cloudServicesEnabled:
+    Collab: 0
     UNet: 1
   luminIcon:
     m_Name: 
@@ -681,10 +682,10 @@ PlayerSettings:
     m_VersionCode: 1
     m_VersionName: 
   apiCompatibilityLevel: 6
-  cloudProjectId: 
+  cloudProjectId: 3b08f34a-785c-469f-8ad9-f43152d6ce56
   framebufferDepthMemorylessMode: 0
-  projectName: 
-  organizationId: 
+  projectName: The Hag
+  organizationId: patroclusx98
   cloudEnabled: 0
   enableNativePlatformBackendsForNewInputSystem: 0
   disableOldInputManagerSupport: 0

@@ -1,5 +1,10 @@
 ﻿using UnityEngine;
 
+/*TODO
+ * Fix wall clipping on sudden motion
+ * Apply velocity on item drop
+ */
+
 public class ObjectInteraction : MonoBehaviour
 {
     public Transform player;
@@ -11,6 +16,8 @@ public class ObjectInteraction : MonoBehaviour
     float defaultDrag = 0f;
     float defaultAngularDrag = 0f;
 
+    Vector3 lastPosition;
+    Vector3 lastVelocity;
     bool beingCarried = false;
     bool dropObject = false;
     GameObject objectInHand;
@@ -92,8 +99,11 @@ public class ObjectInteraction : MonoBehaviour
 
     void carryObject()
     {
+        getVelocityDirection();
+
         //Try to move object to center of camera
         centerHandOject();
+        lastVelocity = getVelocity();
 
         //If object cannot be held anymore drop it
         if (dropObject)
@@ -115,6 +125,8 @@ public class ObjectInteraction : MonoBehaviour
 
     void dropObj()
     {
+        objectInHandRB.AddForce(getVelocityDirection() * Mathf.Clamp(lastVelocity.magnitude * 2f, 0f, 30f), ForceMode.Force);
+
         objectInHand.transform.parent = defaultParent;
         objectInHandRB.drag = defaultDrag;
         objectInHandRB.angularDrag = defaultAngularDrag;
@@ -142,6 +154,26 @@ public class ObjectInteraction : MonoBehaviour
         }
     }
 
+    Vector3 getVelocityDirection()
+    {
+        float mouseX = Input.GetAxis("Mouse X");
+        float mouseY = Input.GetAxis("Mouse Y");
+
+        Vector3 xDirection = objectInHand.transform.position + mainCamera.transform.forward + (mainCamera.transform.right * mouseX);
+        Vector3 yDirection = objectInHand.transform.position + mainCamera.transform.forward + (mainCamera.transform.up * mouseY);
+        Vector3 xyDirection = (xDirection + yDirection) / 2f;
+
+        return xyDirection - objectInHand.transform.position;
+    }
+
+    Vector3 getVelocity()
+    {
+        Vector3 velocity = (objectInHand.transform.position - lastPosition) / Time.deltaTime;
+        lastPosition = objectInHand.transform.position;
+
+        return velocity;
+    }
+
     void stopObjectForces()
     {
         objectInHandRB.velocity = Vector3.zero;
@@ -160,9 +192,6 @@ public class ObjectInteraction : MonoBehaviour
         {
             dropObject = true;
         }
-
-        //Impact too high
-        //TODO
 
         //Object inbetween
         RaycastHit hitInfo;
