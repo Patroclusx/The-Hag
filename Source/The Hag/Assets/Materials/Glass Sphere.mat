@@ -219,21 +219,21 @@ Material:
     - _TransparentDepthPrepassEnable: 1
     - _TransparentSortPriority: 0
     - _TransparentWritingMotionVec: 0
-    - _TransparentZWrite: 0
+    - _TransparentZWrite: 1
     - _UVBase: 0
     - _UVDetail: 0
     - _UVEmissive: 0
     - _UseEmissiveIntensity: 0
     - _UseShadowThreshold: 0
-    - _ZTestDepthEqualForOpaque: 4
+    - _ZTestDepthEqualForOpaque: 3
     - _ZTestGBuffer: 4
     - _ZTestModeDistortion: 4
-    - _ZTestTransparent: 4
-    - _ZWrite: 0
+    - _ZTestTransparent: 3
+    - _ZWrite: 1
     m_Colors:
-    - _BaseColor: {r: 0.3207547, g: 0.3207547, b: 0.3207547, a: 0.08627451}
+    - _BaseColor: {r: 0.18222678, g: 0.3301887, b: 0.29301226, a: 0.5529412}
     - _BaseColorMap_MipInfo: {r: 0, g: 0, b: 0, a: 0}
-    - _Color: {r: 0.32075468, g: 0.32075468, b: 0.32075468, a: 0.08627451}
+    - _Color: {r: 0.18222675, g: 0.33018863, b: 0.29301223, a: 0.5529412}
     - _DiffusionProfileAsset: {r: 0, g: 0, b: 0, a: 0}
     - _DoubleSidedConstants: {r: 1, g: 1, b: -1, a: 0}
     - _EmissionColor: {r: 1, g: 1, b: 1, a: 1}
@@ -243,7 +243,7 @@ Material:
     - _IridescenceThicknessRemap: {r: 0, g: 1, b: 0, a: 0}
     - _SpecularColor: {r: 1, g: 1, b: 1, a: 1}
     - _ThicknessRemap: {r: 0, g: 1, b: 0, a: 0}
-    - _TransmittanceColor: {r: 0.1745283, g: 0.8608026, b: 1, a: 0.54509807}
+    - _TransmittanceColor: {r: 0.9056604, g: 0.2703726, b: 0.252047, a: 0.74509805}
     - _UVDetailsMappingMask: {r: 1, g: 0, b: 0, a: 0}
     - _UVMappingMask: {r: 1, g: 0, b: 0, a: 0}
     - _UVMappingMaskEmissive: {r: 1, g: 0, b: 0, a: 0}

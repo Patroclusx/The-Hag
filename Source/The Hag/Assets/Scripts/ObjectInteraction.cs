@@ -5,6 +5,7 @@ public class ObjectInteraction : MonoBehaviour
     public Transform player;
     public Camera mainCamera;
     public MouseLook mouseLook;
+    public LayerMask layerMask;
 
     Transform defaultParent;
     float defaultDrag = 0f;
@@ -35,6 +36,7 @@ public class ObjectInteraction : MonoBehaviour
             {
                 carryObject();
 
+                //Object rotation in hand
                 if (Input.GetKey(KeyCode.R))
                 {
                     mouseLook.isEnabled = false;
@@ -77,8 +79,8 @@ public class ObjectInteraction : MonoBehaviour
                 defaultDrag = objectInHandRB.drag;
                 defaultAngularDrag = objectInHandRB.angularDrag;
 
-                objectInHandRB.useGravity = false;
                 objectInHand.transform.parent = gameObject.transform;
+                objectInHandRB.useGravity = false;
                 stopObjectForces();
 
                 dropObject = false;
@@ -93,14 +95,14 @@ public class ObjectInteraction : MonoBehaviour
         //Try to move object to center of camera
         centerHandOject();
 
-        //If object too far drop it
+        //If object cannot be held anymore drop it
         if (dropObject)
         {
             dropObj();
         }
         else
         {
-            checkPlayerDistance();
+            checkObjDrop();
         }
 
         //Throw object
@@ -147,37 +149,34 @@ public class ObjectInteraction : MonoBehaviour
         objectInHandRB.Sleep();
     }
 
-    public void OnCollisionEnterCustom(Collision collision, GameObject senderObject)
-    {
-        if (senderObject == objectInHand)
-        {
-            //TODO: Play impact sound
-            //      Drop item on big impact
-        }
-    }
-
-    void checkPlayerDistance()
+    void checkObjDrop()
     {
         Vector3 cameraPosition = mainCamera.transform.position;
         Vector3 objPosition = objectInHand.transform.position;
-        Vector3 screenPoint = mainCamera.WorldToViewportPoint(objPosition);
 
+        //Too far from player
         float dist = Vector3.Distance(objPosition, cameraPosition);
-        if (dist > PlayerStats.reachDistance + 0.2f)
+        if (dist > PlayerStats.reachDistance + 0.25f)
         {
             dropObject = true;
         }
 
+        //Impact too high
+        //TODO
+
+        //Object inbetween
         RaycastHit hitInfo;
-        if (Physics.Raycast(cameraPosition, objPosition- cameraPosition, out hitInfo, PlayerStats.reachDistance, -1, QueryTriggerInteraction.Ignore))
+        if (Physics.Raycast(cameraPosition, objPosition - cameraPosition, out hitInfo, PlayerStats.reachDistance, layerMask, QueryTriggerInteraction.Ignore))
         {
             if (!hitInfo.transform.gameObject.Equals(objectInHand)) 
-            { 
+            {
                 dropObject = true;
             }
         }
 
-        if(screenPoint.x < 0.2f || screenPoint.x > 0.8f || screenPoint.y < 0.15f || screenPoint.y > 0.95f)
+        //Too far off screen
+        Vector3 screenPoint = mainCamera.WorldToViewportPoint(objPosition);
+        if (screenPoint.x < 0.2f || screenPoint.x > 0.8f || screenPoint.y < 0.15f || screenPoint.y > 0.95f)
         {
             dropObject = true;
         }
