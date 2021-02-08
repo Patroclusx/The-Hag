@@ -1,6 +1,10 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
+/* TODO
+ * Material based step sounds
+ */
+
 public class PlayerMovement : MonoBehaviour
 {
     public Transform playerBody;

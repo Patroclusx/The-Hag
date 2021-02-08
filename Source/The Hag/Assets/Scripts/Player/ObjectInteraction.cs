@@ -2,7 +2,6 @@
 
 /*TODO
  * Fix wall clipping on sudden motion
- * Apply velocity on item drop
  */
 
 public class ObjectInteraction : MonoBehaviour

@@ -7,7 +7,7 @@ public class RunningFOV : MonoBehaviour
 
     float defaultFov;
 
-    public float distortionSensitivity = 0.0225f;
+    public float distortionSensitivity = 3f;
 
     void Start()
     {
@@ -19,13 +19,13 @@ public class RunningFOV : MonoBehaviour
     {
         if (playerMovement.isRunning || (playerMovement.isSliding && playerMovement.slopeSpeed > 4.5f)) 
         {
-            mainCamera.fieldOfView = Mathf.Lerp(mainCamera.fieldOfView, (defaultFov + 15f), distortionSensitivity);
+            mainCamera.fieldOfView = Mathf.Lerp(mainCamera.fieldOfView, (defaultFov + 15f), distortionSensitivity * Time.deltaTime);
         }
         else
         {
             if (mainCamera.fieldOfView > 60.01f)
             {
-                mainCamera.fieldOfView = Mathf.Lerp(mainCamera.fieldOfView, defaultFov, distortionSensitivity);
+                mainCamera.fieldOfView = Mathf.Lerp(mainCamera.fieldOfView, defaultFov, distortionSensitivity * Time.deltaTime);
             }
         }
     }
