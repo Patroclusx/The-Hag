@@ -40,7 +40,7 @@ public class PlayerMovement : MonoBehaviour
 
     [HideInInspector]
     public bool isGrounded;
-    float groundDistance = 0.375f;
+    float groundDistanceNormal = 0.35f;
     public LayerMask groundMask;
     float defaultStepOffset;
 
@@ -60,7 +60,7 @@ public class PlayerMovement : MonoBehaviour
     void Update()
     {
         //Ground check logic
-        isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask, QueryTriggerInteraction.Ignore);
+        isGrounded = Physics.CheckSphere(groundCheck.position, groundDistanceNormal, groundMask, QueryTriggerInteraction.Ignore);
 
         //Movement logic 
         if ((Input.GetAxis("Horizontal") != 0 || Input.GetAxis("Vertical") != 0))
@@ -111,14 +111,14 @@ public class PlayerMovement : MonoBehaviour
                 verticalVelocity.y = -4f;
             }
 
-            SlopeSlide();
-
             if (isJumping)
             {
                 characterController.stepOffset = defaultStepOffset;
                 hasJumped = false;
                 isJumping = false;
             }
+
+            SlopeSlide();
         }
 
         characterController.Move(verticalVelocity * Time.deltaTime);
@@ -234,7 +234,7 @@ public class PlayerMovement : MonoBehaviour
             ray.direction = Vector3.up;
             if (!Physics.Raycast(ray, out hit, characterController.height - 0.1f, -1, QueryTriggerInteraction.Ignore))
             {
-                groundCheck.localPosition = new Vector3(0f, -0.6f, 0f);
+                groundCheck.localPosition = new Vector3(0f, -0.55f, 0f); //Default ground check Y
                 characterController.height = 2f;
                 isCrouching = false;
 

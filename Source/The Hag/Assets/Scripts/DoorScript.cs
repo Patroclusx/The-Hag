@@ -16,7 +16,7 @@ public class DoorScript : MonoBehaviour
     bool isDoorGrabbed = false;
     bool isSlammed = false;
 
-    float xDegMotion;
+    float zDegMotion;
     float physicsVelocity = 0f;
     Quaternion defaultClosedRotation;
     Quaternion fromRotation;
@@ -41,7 +41,7 @@ public class DoorScript : MonoBehaviour
     {
         mouseLook = Camera.main.GetComponent<MouseLook>();
         doorHandleAnimator = doorObject.GetComponent<Animator>();
-        defaultClosedRotation = doorObject.transform.parent.rotation;
+        defaultClosedRotation = doorObject.transform.parent.localRotation;
     }
 
     // Update is called once per frame
@@ -86,11 +86,11 @@ public class DoorScript : MonoBehaviour
                     return;
                 }
 
-                xDegMotion = doorObject.transform.rotation.eulerAngles.y;
-                float lastXDeg = xDegMotion;
-                calcXDegMotion();
+                zDegMotion = doorObject.transform.localEulerAngles.z;
+                float lastZDeg = zDegMotion;
+                calcZDegMotion();
 
-                if (Mathf.Abs(lastXDeg - xDegMotion) > 0.04f)
+                if (Mathf.Abs(lastZDeg - zDegMotion) > 0.04f)
                 {
                     if (prevCoroutine != null)
                     {
@@ -99,13 +99,13 @@ public class DoorScript : MonoBehaviour
                         physicsVelocity = 0f;
                     }
 
-                    fromRotation = doorObject.transform.rotation;
-                    toRotation = Quaternion.Euler(fromRotation.eulerAngles.x, xDegMotion, fromRotation.eulerAngles.z);
-                    doorObject.transform.rotation = Quaternion.Lerp(fromRotation, toRotation, 1f);
+                    fromRotation = doorObject.transform.localRotation;
+                    toRotation = Quaternion.Euler(fromRotation.eulerAngles.x, fromRotation.eulerAngles.y, zDegMotion);
+                    doorObject.transform.localRotation = Quaternion.Lerp(fromRotation, toRotation, 1f);
 
                     //Calc highest velocity applied by player
-                    float tempVelocity = (lastXDeg - xDegMotion) * 45f;
-                    if (Mathf.Abs(physicsVelocity) < Mathf.Abs(tempVelocity) && Mathf.Abs(lastXDeg - xDegMotion) > 0.12f) {
+                    float tempVelocity = (lastZDeg - zDegMotion) * 45f;
+                    if (Mathf.Abs(physicsVelocity) < Mathf.Abs(tempVelocity) && Mathf.Abs(lastZDeg - zDegMotion) > 0.12f) {
                         physicsVelocity = tempVelocity;
                     }
                 }
@@ -147,14 +147,14 @@ public class DoorScript : MonoBehaviour
     {
         if (isLeftWing)
         {
-            if (doorObject.transform.eulerAngles.y < (isDeadShut ? defaultClosedRotation.eulerAngles.y : defaultClosedRotation.eulerAngles.y - 1.5f))
+            if (doorObject.transform.localEulerAngles.z < (isDeadShut ? defaultClosedRotation.eulerAngles.z : defaultClosedRotation.eulerAngles.z + 358.5f))
             {
                 return false;
             }
         }
         else
         {
-            if (doorObject.transform.eulerAngles.y > (isDeadShut ? defaultClosedRotation.eulerAngles.y : defaultClosedRotation.eulerAngles.y + 1.5f))
+            if (doorObject.transform.localEulerAngles.z > (isDeadShut ? defaultClosedRotation.eulerAngles.z : defaultClosedRotation.eulerAngles.z + 1.5f))
             {
                 return false;
             }
@@ -166,7 +166,7 @@ public class DoorScript : MonoBehaviour
     //Shuts the door instantly
     void closeDoor()
     {
-        doorObject.transform.rotation = Quaternion.Euler(doorObject.transform.eulerAngles.x, defaultClosedRotation.eulerAngles.y, doorObject.transform.eulerAngles.z);
+        doorObject.transform.localRotation = Quaternion.Euler(doorObject.transform.localEulerAngles.x, doorObject.transform.localEulerAngles.y, defaultClosedRotation.eulerAngles.z);
     }
 
     //Check of the player is near the door
@@ -190,22 +190,22 @@ public class DoorScript : MonoBehaviour
     {
         if (isLeftWing)
         {
-            return Mathf.Clamp(rotation, defaultClosedRotation.eulerAngles.y - 120f, defaultClosedRotation.eulerAngles.y);
+            return Mathf.Clamp(rotation, defaultClosedRotation.eulerAngles.z + 240f, defaultClosedRotation.eulerAngles.z + 360f);
         }
         else
         {
-            return Mathf.Clamp(rotation, defaultClosedRotation.eulerAngles.y, defaultClosedRotation.eulerAngles.y + 120f);
+            return Mathf.Clamp(rotation, defaultClosedRotation.eulerAngles.z, defaultClosedRotation.eulerAngles.z + 120f);
         }
     }
 
     //Calculate the rotation from the velocity after player stops moving door
     void calcVelocityToRotation(float multiplier)
     {
-        fromRotation = doorObject.transform.rotation;
-        float toRotationYVelocity = clampRotation(fromRotation.eulerAngles.y - physicsVelocity * multiplier);
-        if (toRotationYVelocity != fromRotation.eulerAngles.y)
+        fromRotation = doorObject.transform.localRotation;
+        float toRotationZVelocity = clampRotation(fromRotation.eulerAngles.z - physicsVelocity * multiplier);
+        if (toRotationZVelocity != fromRotation.eulerAngles.z)
         {
-            toRotation = Quaternion.Euler(fromRotation.eulerAngles.x, toRotationYVelocity, fromRotation.eulerAngles.z);
+            toRotation = Quaternion.Euler(fromRotation.eulerAngles.x, fromRotation.eulerAngles.y, toRotationZVelocity);
         }
 
         physicsVelocity = 0f;
@@ -218,7 +218,7 @@ public class DoorScript : MonoBehaviour
         while (lerpTimer < 1f)
         {
             lerpTimer += Time.deltaTime / (useSmoothing ? 1.4f : 1f);
-            doorObject.transform.rotation = Quaternion.Lerp(fromRotation, toRotation, 1-Mathf.Pow(1-lerpTimer, 3));
+            doorObject.transform.localRotation = Quaternion.Lerp(fromRotation, toRotation, 1-Mathf.Pow(1-lerpTimer, 3));
 
             yield return null;
         }
@@ -227,75 +227,74 @@ public class DoorScript : MonoBehaviour
         prevCoroutine = null;
     }
 
-    void calcXDegMotion()
+    void calcZDegMotion()
     {
-        float mouseX = Input.GetAxis("Mouse X") * (mouseLook.mouseSens * 0.7f);
-        float mouseY = Input.GetAxis("Mouse Y") * (mouseLook.mouseSens * 0.7f);
-        float walkX = Input.GetAxis("Vertical") * 0.7f;
-        float walkY = Input.GetAxis("Horizontal") * 0.7f;
+        float sensitivity = 0.7f;
+        float mouseX = Input.GetAxis("Mouse X") * (mouseLook.mouseSens * sensitivity);
+        float mouseY = Input.GetAxis("Mouse Y") * (mouseLook.mouseSens * sensitivity);
+        float walkX = Input.GetAxis("Vertical") * sensitivity;
+        float walkY = Input.GetAxis("Horizontal") * sensitivity;
 
         calcMouseDotProduct();
         calcWalkDotProduct();
-
-        //print(mouseDotProduct);
 
         //Player movement
         if (walkDotProduct < -0.5f)
         {
             //Front Side
-            xDegMotion = clampRotation(isLeftWing ? xDegMotion - walkX : xDegMotion + walkX);
+            zDegMotion = clampRotation(isLeftWing ? zDegMotion + walkX : zDegMotion - walkX);
         }
         else if (walkDotProduct > 0.5f)
         {
             //Back Side
-            xDegMotion = clampRotation(isLeftWing ? xDegMotion + walkX : xDegMotion - walkX);
+            zDegMotion = clampRotation(isLeftWing ? zDegMotion - walkX : zDegMotion + walkX);
         }
         else
         {
             //In between
-            xDegMotion = clampRotation(xDegMotion - walkY);
+            zDegMotion = clampRotation(zDegMotion - walkY);
         }
 
         //Mouse movement
         if(walkDotProduct < 0f)
         {
             //Front side
-            if(mouseDotProduct < 0.455f && mouseDotProduct > -0.455f)
+            if(mouseDotProduct < 0.46f && mouseDotProduct > -0.46f)
             {
                 //Middle look
-                xDegMotion = clampRotation(isLeftWing ? xDegMotion - mouseY : xDegMotion + mouseY);
+                zDegMotion = clampRotation(isLeftWing ? zDegMotion + mouseY : zDegMotion - mouseY);
             }
-            else
+            if(mouseDotProduct > 0.43f || mouseDotProduct < -0.43f)
             {
                 //Angled look
                 if (mouseDotProduct > 0.455f)
                 {
-                    xDegMotion = clampRotation(isLeftWing ? xDegMotion - mouseX : xDegMotion + mouseX);
+                    zDegMotion = clampRotation(isLeftWing ? zDegMotion + mouseX : zDegMotion - mouseX);
                 }
                 else if (mouseDotProduct < -0.455f)
                 {
-                    xDegMotion = clampRotation(isLeftWing ? xDegMotion + mouseX : xDegMotion - mouseX);
+                    zDegMotion = clampRotation(isLeftWing ? zDegMotion - mouseX : zDegMotion + mouseX);
                 }
             }
         }
         else
         {
             //Back side
-            if (mouseDotProduct < 0.455f && mouseDotProduct > -0.455f)
+            if (mouseDotProduct < 0.46f && mouseDotProduct > -0.46f)
             {
                 //Middle look
-                xDegMotion = clampRotation(isLeftWing ? xDegMotion + mouseY : xDegMotion - mouseY);
+                zDegMotion = clampRotation(isLeftWing ? zDegMotion - mouseY : zDegMotion + mouseY);
             }
-            else
+            if (mouseDotProduct > 0.43f || mouseDotProduct < -0.43f)
             {
                 //Angled look
                 if (mouseDotProduct > 0.455f)
                 {
-                    xDegMotion = clampRotation(isLeftWing ? xDegMotion - mouseX : xDegMotion + mouseX);
+                    zDegMotion = clampRotation(isLeftWing ? zDegMotion + mouseX : zDegMotion - mouseX);
                 }
                 else if (mouseDotProduct < -0.455f)
                 {
-                    xDegMotion = clampRotation(isLeftWing ? xDegMotion + mouseX : xDegMotion - mouseX);
+                    zDegMotion = clampRotation(isLeftWing ? zDegMotion - mouseX : zDegMotion + mouseX);
                 }
             }
         }
@@ -360,22 +359,22 @@ public class DoorScript : MonoBehaviour
         {
             if (walkDotProduct > 0.02f)
             {
-                physicsVelocity = -1000f;
+                physicsVelocity = 1000f;
             }
             else if (walkDotProduct < -0.02f)
             {
-                physicsVelocity = 1000f;
+                physicsVelocity = -1000f;
             }
         }
         else
         {
             if (walkDotProduct > 0.02f)
             {
-                physicsVelocity = 1000f;
+                physicsVelocity = -1000f;
             }
             else if (walkDotProduct < -0.02f)
             {
-                physicsVelocity = -1000f;
+                physicsVelocity = 1000f;
             }
         }
     }

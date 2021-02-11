@@ -4,9 +4,9 @@ public class HeadBobbing : MonoBehaviour
 {
     public PlayerMovement playerMovement;
 
-    public float walkingBobbingSpeed = 12.5f;
-    public float runningBobbingSpeed = 18f;
-    public float bobbingAmount = 0.03f;
+    public float bobbingAmount = 0.04f;
+    float walkingBobbingSpeed = 12.5f;
+    float runningBobbingSpeed = 18f;
 
     float defaultPosX;
     float defaultPosY;
@@ -22,7 +22,7 @@ public class HeadBobbing : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Mathf.Abs(playerMovement.moveVelocity.x) > 0.35f || Mathf.Abs(playerMovement.moveVelocity.z) > 0.35f)
+        if ((playerMovement.isWalking || playerMovement.isRunning) && (Mathf.Abs(playerMovement.moveVelocity.x) > 0.35f || Mathf.Abs(playerMovement.moveVelocity.z) > 0.35f))
         {
             //Player is moving
             timer += Time.deltaTime * (playerMovement.isRunning ? runningBobbingSpeed : walkingBobbingSpeed) * (playerMovement.isCrouching ? 0.5f : 1f);

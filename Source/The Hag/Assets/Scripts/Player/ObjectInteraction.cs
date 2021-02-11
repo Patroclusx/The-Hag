@@ -9,29 +9,28 @@ public class ObjectInteraction : MonoBehaviour
     public Transform player;
     public Camera mainCamera;
     public MouseLook mouseLook;
-    public LayerMask layerMask;
+    public LayerMask ignoredLayer;
 
     Transform defaultParent;
+    Vector3 defaultScale;
     float defaultDrag = 0f;
     float defaultAngularDrag = 0f;
+    int defaultLayer = 0;
 
+    [HideInInspector]
+    public bool carryingObject = false;
+    bool dropObject = false;
+    float objDistanceBySize;
     Vector3 lastPosition;
     Vector3 lastVelocity;
-    bool beingCarried = false;
-    bool dropObject = false;
     GameObject objectInHand;
     Rigidbody objectInHandRB;
-
-    void Start()
-    {
-        gameObject.transform.position = mainCamera.transform.position + mainCamera.transform.forward;
-    }
 
     void Update()
     {
         if (Input.GetKey(KeyCode.Mouse0))
         {
-            if (!beingCarried)
+            if (!carryingObject)
             {
                 if (PlayerStats.canInteract && Input.GetKeyDown(KeyCode.Mouse0))
                 {
@@ -61,7 +60,7 @@ public class ObjectInteraction : MonoBehaviour
         }
         else if(Input.GetKeyUp(KeyCode.Mouse0))
         {
-            if (beingCarried)
+            if (carryingObject)
             {
                 dropObj();
             }
@@ -69,6 +68,14 @@ public class ObjectInteraction : MonoBehaviour
             mouseLook.isEnabled = true;
             PlayerStats.canInteract = true;
         }
+    }
+
+    void calcDistanceBySize()
+    {
+        Vector3 objBoundsSize = Vector3.Scale(objectInHand.transform.localScale, objectInHand.GetComponent<MeshFilter>().sharedMesh.bounds.size);
+        objDistanceBySize = Mathf.Clamp(objBoundsSize.magnitude - 0.75f, 0f, 0.4f);
+
+        gameObject.transform.position = gameObject.transform.position + gameObject.transform.forward * objDistanceBySize;
     }
 
     void pickUpObject()
@@ -81,16 +88,23 @@ public class ObjectInteraction : MonoBehaviour
 
             if (objectInHand.tag == "Interactable" && objectInHandRB != null)
             {
+                //Get object defaults
                 defaultParent = objectInHand.transform.parent;
+                defaultScale = objectInHand.transform.localScale;
                 defaultDrag = objectInHandRB.drag;
                 defaultAngularDrag = objectInHandRB.angularDrag;
+                defaultLayer = objectInHand.layer;
 
+                //Set object params
+                calcDistanceBySize();
                 objectInHand.transform.parent = gameObject.transform;
+                objectInHand.layer = LayerMask.NameToLayer("ObjectCarry");
                 objectInHandRB.useGravity = false;
                 stopObjectForces();
 
+                //Set hand params
                 dropObject = false;
-                beingCarried = true;
+                carryingObject = true;
                 PlayerStats.canInteract = false;
             }
         }
@@ -98,6 +112,7 @@ public class ObjectInteraction : MonoBehaviour
 
     void carryObject()
     {
+        //Get throw direction
         getVelocityDirection();
 
         //Try to move object to center of camera
@@ -124,14 +139,20 @@ public class ObjectInteraction : MonoBehaviour
 
     void dropObj()
     {
+        //If velocity persists, apply that to the item
         objectInHandRB.AddForce(getVelocityDirection() * Mathf.Clamp(lastVelocity.magnitude * 2f, 0f, 30f), ForceMode.Force);
 
+        //Reset object back to default
         objectInHand.transform.parent = defaultParent;
+        objectInHand.transform.localScale = defaultScale;
         objectInHandRB.drag = defaultDrag;
         objectInHandRB.angularDrag = defaultAngularDrag;
+        objectInHand.layer = defaultLayer;
         objectInHandRB.useGravity = true;
 
-        beingCarried = false;
+        //Reset hand
+        gameObject.transform.position = gameObject.transform.position - gameObject.transform.forward * objDistanceBySize;
+        carryingObject = false;
         dropObject = false;
     }
 
@@ -184,27 +205,31 @@ public class ObjectInteraction : MonoBehaviour
     {
         Vector3 cameraPosition = mainCamera.transform.position;
         Vector3 objPosition = objectInHand.transform.position;
+        Vector3 handPosition = gameObject.transform.position;
 
         //Too far from player
         float dist = Vector3.Distance(objPosition, cameraPosition);
-        if (dist > PlayerStats.reachDistance + 0.25f)
+        if (dist > PlayerStats.reachDistance + 0.45f)
         {
             dropObject = true;
         }
 
         //Object inbetween
-        RaycastHit hitInfo;
-        if (Physics.Raycast(cameraPosition, objPosition - cameraPosition, out hitInfo, PlayerStats.reachDistance, layerMask, QueryTriggerInteraction.Ignore))
+        RaycastHit hitInfo1;
+        RaycastHit hitInfo2;
+        bool hit1 = Physics.Raycast(cameraPosition, objPosition - cameraPosition, out hitInfo1, PlayerStats.reachDistance, ~ignoredLayer, QueryTriggerInteraction.Ignore);
+        bool hit2 = Physics.Raycast(cameraPosition, handPosition - cameraPosition, out hitInfo2, PlayerStats.reachDistance, ~ignoredLayer, QueryTriggerInteraction.Ignore);
+        if (hit1 && hit2)
         {
-            if (!hitInfo.transform.gameObject.Equals(objectInHand)) 
+            if (!hitInfo1.transform.gameObject.Equals(objectInHand) && !hitInfo2.transform.gameObject.Equals(objectInHand))
             {
                 dropObject = true;
             }
         }
 
         //Too far off screen
-        Vector3 screenPoint = mainCamera.WorldToViewportPoint(objPosition);
-        if (screenPoint.x < 0.2f || screenPoint.x > 0.8f || screenPoint.y < 0.15f || screenPoint.y > 0.95f)
+        Plane[] planes = GeometryUtility.CalculateFrustumPlanes(Camera.main);
+        if (!GeometryUtility.TestPlanesAABB(planes, objectInHand.GetComponent<Collider>().bounds))
         {
             dropObject = true;
         }
