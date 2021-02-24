@@ -2,7 +2,7 @@
 using UnityEngine;
 
 /* TODO
- * Material based step sounds
+ * Material based step sliding and impact sounds
  */
 
 public class PlayerMovement : MonoBehaviour
@@ -21,6 +21,7 @@ public class PlayerMovement : MonoBehaviour
     public float playerSpeed;
     public float walkSpeed = 2f;
     public float sprintSpeed = 4f;
+    public float climbSpeed = 1f;
 
     [HideInInspector]
     public Vector3 moveVelocity;
@@ -48,8 +49,9 @@ public class PlayerMovement : MonoBehaviour
     public bool isSliding = false;
     [HideInInspector]
     public float slopeSpeed = 0;
-    RaycastHit slopeHit;
-    Vector3 slopeParallel;
+
+    [HideInInspector]
+    public bool isClimbing = false;
 
     private void Start()
     {
@@ -63,10 +65,11 @@ public class PlayerMovement : MonoBehaviour
         isGrounded = Physics.CheckSphere(groundCheck.position, groundDistanceNormal, groundMask, QueryTriggerInteraction.Ignore);
 
         //Movement logic 
-        if ((Input.GetAxis("Horizontal") != 0 || Input.GetAxis("Vertical") != 0))
+        bool isMoving = (Input.GetAxis("Horizontal") != 0 || Input.GetAxis("Vertical") != 0);
+        if (isMoving && !isClimbing && !isSliding)
         {
             MovePlayer();
-            StepSound();
+            PlayStepSound();
         }
         else
         {
@@ -75,23 +78,29 @@ public class PlayerMovement : MonoBehaviour
             isRunning = false;
         }
 
-        //Crouching logic
-        if (Input.GetKeyDown(KeyCode.LeftControl) /**&& Input.GetButtonUp("Crouch")**/ && isGrounded)
+        //Climbing logic
+        if (Input.GetAxis("Vertical") != 0 && isClimbing)
         {
-            Crouch();
+            Climb();
+        }
+
+        //Crouching logic
+        if (Input.GetKeyDown(KeyCode.LeftControl) && isGrounded && !isClimbing)
+        {
+            ToggleCrouch();
         }
 
         //Jumping logic
-        if (Input.GetKeyDown(KeyCode.Space) && !hasJumped && !isCrouching && !isSliding)
+        if (Input.GetKeyDown(KeyCode.Space) && !hasJumped && !isCrouching && !isSliding && !isClimbing)
         {
-            if (playerStats.canJump)
-            {
-                Jump();
-            }
+            Jump();
         }
 
         //Gravity logic
-        ApplyGravity();
+        if (!isClimbing)
+        {
+            ApplyGravity();
+        }
     }
 
     void ApplyGravity()
@@ -106,6 +115,10 @@ public class PlayerMovement : MonoBehaviour
         }
         else
         {
+            if(verticalVelocity.y < -4f)
+            {
+                PlayImpactSound();
+            }
             if (verticalVelocity.y < 0f)
             {
                 verticalVelocity.y = -4f;
@@ -118,25 +131,28 @@ public class PlayerMovement : MonoBehaviour
                 isJumping = false;
             }
 
-            SlopeSlide();
+            Slide();
         }
 
         characterController.Move(verticalVelocity * Time.deltaTime);
     }
 
-    private void SlopeSlide()
+    private void Slide()
     {
-        Physics.Raycast(playerBody.position, Vector3.down, out slopeHit, 1f, -1, QueryTriggerInteraction.Ignore);
-        Vector3 n = slopeHit.normal;
+        float slideSpeed = 10f;
+        RaycastHit groundHit;
 
-        Vector3 groundParallel = Vector3.Cross(playerBody.up, n);
-        slopeParallel = Vector3.Cross(groundParallel, n);
+        bool groundRayCast = Physics.Raycast(playerBody.position, Vector3.down, out groundHit, 1.2f, -1, QueryTriggerInteraction.Ignore);
+        Vector3 groundNormal = groundHit.normal;
 
-        float currentSlope = Mathf.Round(Vector3.Angle(n, playerBody.up));
+        Vector3 groundParallel = Vector3.Cross(playerBody.up, groundNormal);
+        Vector3 slopeParallel = Vector3.Cross(groundParallel, groundNormal);
 
-        if (currentSlope > characterController.slopeLimit && isGrounded && (slopeHit.collider.gameObject.layer == LayerMask.NameToLayer("Slope")))
+        float currentSlope = Mathf.Round(Vector3.Angle(groundNormal, playerBody.up));
+
+        if (isGrounded && groundRayCast && currentSlope > characterController.slopeLimit)
         {
-            slopeSpeed += Time.deltaTime * (slopeParallel.magnitude + (isSliding ? 0f : (moveVelocity.magnitude * 80f))) * 12f;
+            slopeSpeed += Time.deltaTime * (slopeParallel.magnitude + (isSliding ? 0f : (moveVelocity.magnitude * 80f))) * slideSpeed;
             characterController.Move(slopeParallel * slopeSpeed * Time.deltaTime);
             audioManager.playSound3D("Sound_Player_Slide", false, 0f, gameObject);
             isSliding = true;
@@ -146,9 +162,9 @@ public class PlayerMovement : MonoBehaviour
             if (isSliding)
             {
                 audioManager.fadeOutSound3D("Sound_Player_Slide", 0.35f, gameObject);
+                slopeSpeed = 0;
+                isSliding = false;
             }
-            slopeSpeed = 0;
-            isSliding = false;
         }
     }
 
@@ -179,12 +195,6 @@ public class PlayerMovement : MonoBehaviour
             isRunning = false;
         }
 
-        if (isSliding)
-        {
-            x = 0;
-            z = 0;
-        }
-
         if (isGrounded)
         {
             moveVelocity = playerBody.right * x + playerBody.forward * z;
@@ -196,32 +206,72 @@ public class PlayerMovement : MonoBehaviour
             playerSpeed *= 0.75f;
         }
 
+        characterController.Move(moveVelocity * playerSpeed * Time.deltaTime);
+    }
+
+    void Climb()
+    {
+        float y = Input.GetAxis("Vertical");
+        playerSpeed = climbSpeed;
+
+        if (isCrouching)
+        {
+            ToggleCrouch();
+            ApplyGravity();
+        }
+
+        if (!isGrounded)
+        {
+            if (y > 0f)
+            {
+                moveVelocity = playerBody.up * y + playerBody.forward * y;
+            }
+            else
+            {
+                moveVelocity = playerBody.up * y;
+            }
+        }
+        else
+        {
+            if(y > 0f)
+            {
+                moveVelocity = playerBody.up * y;
+            }
+            else
+            {
+                moveVelocity = playerBody.up * y + playerBody.forward * y;
+            }
+        }
 
         characterController.Move(moveVelocity * playerSpeed * Time.deltaTime);
     }
 
     void Jump()
     {
-        Ray ray = new Ray();
-        RaycastHit hit;
-        ray.origin = playerBody.position;
-        ray.direction = Vector3.up;
-        if (!Physics.Raycast(ray, out hit, characterController.height - 1.2f, -1, QueryTriggerInteraction.Ignore))
+        if (playerStats.canJump)
         {
-            characterController.stepOffset = 0f;
-            verticalVelocity.y = Mathf.Sqrt(jumpHeight * -1f * gravityForce);
-            hasJumped = true;
+            Ray ray = new Ray();
+            RaycastHit hit;
+            ray.origin = playerBody.position;
+            ray.direction = Vector3.up;
+            if (!Physics.Raycast(ray, out hit, characterController.height - 1.2f, -1, QueryTriggerInteraction.Ignore))
+            {
+                characterController.stepOffset = 0f;
+                verticalVelocity.y = Mathf.Sqrt(jumpHeight * -1f * gravityForce);
+                hasJumped = true;
 
-            audioManager.playCollectionSound3D("Sound_Player_Jump", true, 0f, gameObject);
+                audioManager.playCollectionSound3D("Sound_Player_Jump", true, 0f, gameObject);
+            }
         }
     }
 
-    void Crouch()
+    void ToggleCrouch()
     {
         if (!isCrouching)
         {
-            groundCheck.localPosition = new Vector3(0f, groundCheck.localPosition.y + (characterController.height - crouchHeight) / 2, 0f);
+            groundCheck.localPosition = new Vector3(0f, groundCheck.localPosition.y + (characterController.height - crouchHeight) * 0.5f, 0f);
             characterController.height = crouchHeight;
+            playerBody.position = new Vector3(playerBody.position.x, playerBody.position.y * 0.5f, playerBody.position.z);
             isCrouching = true;
 
             audioManager.playCollectionSound2D("Sound_Player_Crouch", true, 0f);
@@ -243,7 +293,7 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
-    void StepSound()
+    void PlayStepSound()
     {
         if (isGrounded && moveVelocity.magnitude > 0.35f)
         {
@@ -256,6 +306,13 @@ public class PlayerMovement : MonoBehaviour
                 audioManager.playCollectionSound3D("Sound_Step_Run_Dirt", true, 0.275f, gameObject);
             }
 
+        }
+    }
+
+    void PlayImpactSound()
+    {
+        if (isGrounded) { 
+            audioManager.playCollectionSound3D("Sound_Step_Walk_Dirt", true, 0f, gameObject);
         }
     }
 }

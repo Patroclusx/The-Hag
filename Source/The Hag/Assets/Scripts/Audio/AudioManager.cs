@@ -191,9 +191,9 @@ public class AudioManager : MonoBehaviour
             {
                 if (!canOverlap)
                 {
-                    AudioSource scSourceIsPlaying = Array.Find(sc.collectionSources.ToArray(), sound => sound.isPlaying == true);
+                    bool scSourceIsPlaying = Array.Find(sc.collectionSources.ToArray(), sound => sound.isPlaying == true) != null ? true : false;
 
-                    if (scSourceIsPlaying == null)
+                    if (!scSourceIsPlaying)
                     {
                         sc.collectionSources[randomSource].Play();
                         sc.lastSourcePlayed = sc.collectionSources[randomSource];
@@ -246,9 +246,11 @@ public class AudioManager : MonoBehaviour
 
                 if (!canOverlap)
                 {
-                    AudioSource scSourceIsPlaying = Array.Find(gameObjectAttach.GetComponents<AudioSource>(), sound => sound.isPlaying == true);
+                    bool objSCSourceIsPlaying = Array.Find(Array.FindAll(gameObjectAttach.GetComponents<AudioSource>(),                 //What
+                        objSource => Array.Find(sc.collectionSources.ToArray(), scSource => objSource.clip == scSource.clip) != null),  //the
+                        sound => sound.isPlaying == true) != null ? true : false;                                                       //fuck?
 
-                    if (scSourceIsPlaying == null)
+                    if (!objSCSourceIsPlaying)
                     {
                         objSC.Play();
                         sc.lastSourcePlayed = sc.collectionSources[randomSource];

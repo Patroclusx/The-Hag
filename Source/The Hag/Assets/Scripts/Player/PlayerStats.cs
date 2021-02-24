@@ -11,7 +11,7 @@ public class PlayerStats : MonoBehaviour
     [System.NonSerialized]
     public static bool canInteract = true;
     [System.NonSerialized]
-    public static float reachDistance = 1.2f;
+    public static float reachDistance = 1.1f;
     [System.NonSerialized]
     public static float throwForce = 180f;
 

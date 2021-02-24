@@ -11,19 +11,12 @@ public class Crosshair : MonoBehaviour
     void Update()
     {
         RaycastHit hitInfo;
+        bool raycast = Physics.Raycast(Camera.main.transform.position, Camera.main.transform.forward, out hitInfo, PlayerStats.reachDistance, -1, QueryTriggerInteraction.Ignore);
 
-        if (Physics.Raycast(Camera.main.transform.position, Camera.main.transform.forward, out hitInfo, PlayerStats.reachDistance, -1, QueryTriggerInteraction.Ignore))
+        if (raycast && PlayerStats.canInteract && hitInfo.transform.tag == "Interactable")
         {
-            if (hitInfo.transform.tag == "Interactable" && PlayerStats.canInteract)
-            {
-                crosshairHand.SetActive(true);
-                crosshair.SetActive(false);
-            }
-            else
-            {
-                crosshairHand.SetActive(false);
-                crosshair.SetActive(true);
-            }
+            crosshairHand.SetActive(true);
+            crosshair.SetActive(false);
         }
         else
         {

@@ -81,7 +81,7 @@ public class ObjectInteraction : MonoBehaviour
     void pickUpObject()
     {
         RaycastHit hitInfo;
-        if (Physics.Raycast(Camera.main.transform.position, Camera.main.transform.forward, out hitInfo, PlayerStats.reachDistance, -1, QueryTriggerInteraction.Ignore))
+        if (Physics.Raycast(Camera.main.transform.position, Camera.main.transform.forward, out hitInfo, PlayerStats.reachDistance, LayerMask.GetMask("Object"), QueryTriggerInteraction.Ignore))
         {
             objectInHand = hitInfo.transform.gameObject;
             objectInHandRB = objectInHand.GetComponent<Rigidbody>();
