@@ -8,7 +8,9 @@ public class FrequencyTimer : MonoBehaviour
 
     float timeElapsedWhileMute = 0f;
     float frequencyCounter = 0f;
+
     bool hasStarted = false;
+    bool hasEnded = false;
 
     public static FrequencyTimer getInstance(string ID, GameObject gameObject)
     {
@@ -31,8 +33,10 @@ public class FrequencyTimer : MonoBehaviour
             timeElapsedWhileMute = 0;
             countFreq();
         }
-
-        timeElapsedWhileMute += Time.deltaTime * 0.85f;
+        else
+        {
+            timeElapsedWhileMute += Time.deltaTime;
+        }
 
         if(timeElapsedWhileMute > frequencyInSeconds)
         {
@@ -50,21 +54,42 @@ public class FrequencyTimer : MonoBehaviour
         {
             frequencyCounter = 0f;
             hasStarted = false;
+            hasEnded = true;
         }
     }
 
-    public bool isWaiting(float frequencyInSeconds)
+    public bool isStartPhase(float frequencyInSeconds)
     {
         if (!hasStarted)
         {
             this.frequencyInSeconds = frequencyInSeconds;
             hasStarted = true;
+            hasEnded = false;
 
-            return false;
+            return true;
         }
         else 
         {
-            return true; 
+            return false; 
+        }
+    }
+
+    public bool isEndPhase(float frequencyInSeconds)
+    {
+        if (!hasStarted)
+        {
+            this.frequencyInSeconds = frequencyInSeconds;
+            hasStarted = true;
+        }
+
+        if (hasEnded)
+        {
+            hasEnded = false;
+            return true;
+        }
+        else
+        {
+            return false;
         }
     }
 }
