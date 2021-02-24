@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class Ladder : MonoBehaviour
+public class Climbable : MonoBehaviour
 {
     PlayerMovement playerMovement;
     bool canClimb;
