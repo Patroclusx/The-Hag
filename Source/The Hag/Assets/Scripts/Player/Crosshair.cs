@@ -11,7 +11,7 @@ public class Crosshair : MonoBehaviour
     void Update()
     {
         RaycastHit hitInfo;
-        bool raycast = Physics.Raycast(Camera.main.transform.position, Camera.main.transform.forward, out hitInfo, PlayerStats.reachDistance, -1, QueryTriggerInteraction.Ignore);
+        bool raycast = Physics.Raycast(Camera.main.transform.position, Camera.main.transform.forward, out hitInfo, PlayerStats.reachDistance, ~LayerMask.GetMask("Player"), QueryTriggerInteraction.Ignore);
 
         if (raycast && PlayerStats.canInteract && hitInfo.transform.tag == "Interactable")
         {

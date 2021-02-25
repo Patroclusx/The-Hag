@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 /* TODO
  * Material based step sliding and impact sounds
@@ -7,7 +6,6 @@ using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
-    public Transform playerBody;
     public CharacterController characterController;
     public PlayerStats playerStats;
     public Transform groundCheck;
@@ -41,7 +39,8 @@ public class PlayerMovement : MonoBehaviour
 
     [HideInInspector]
     public bool isGrounded;
-    float groundDistanceNormal = 0.35f;
+    [HideInInspector]
+    public float groundDistanceNormal = 0.35f;
     public LayerMask groundMask;
     float defaultStepOffset;
 
@@ -142,13 +141,13 @@ public class PlayerMovement : MonoBehaviour
         float slideSpeed = 10f;
         RaycastHit groundHit;
 
-        bool groundRayCast = Physics.Raycast(playerBody.position, Vector3.down, out groundHit, 1.2f, -1, QueryTriggerInteraction.Ignore);
+        bool groundRayCast = Physics.Raycast(gameObject.transform.position, Vector3.down, out groundHit, 1.2f, -1, QueryTriggerInteraction.Ignore);
         Vector3 groundNormal = groundHit.normal;
 
-        Vector3 groundParallel = Vector3.Cross(playerBody.up, groundNormal);
+        Vector3 groundParallel = Vector3.Cross(gameObject.transform.up, groundNormal);
         Vector3 slopeParallel = Vector3.Cross(groundParallel, groundNormal);
 
-        float currentSlope = Mathf.Round(Vector3.Angle(groundNormal, playerBody.up));
+        float currentSlope = Mathf.Round(Vector3.Angle(groundNormal, gameObject.transform.up));
 
         if (isGrounded && groundRayCast && currentSlope > characterController.slopeLimit)
         {
@@ -197,7 +196,7 @@ public class PlayerMovement : MonoBehaviour
 
         if (isGrounded)
         {
-            moveVelocity = playerBody.right * x + playerBody.forward * z;
+            moveVelocity = gameObject.transform.right * x + gameObject.transform.forward * z;
         }
 
         //Strafe running speed fix
@@ -224,22 +223,22 @@ public class PlayerMovement : MonoBehaviour
         {
             if (y > 0f)
             {
-                moveVelocity = playerBody.up * y + playerBody.forward * y;
+                moveVelocity = gameObject.transform.up * y + gameObject.transform.forward * y;
             }
             else
             {
-                moveVelocity = playerBody.up * y;
+                moveVelocity = gameObject.transform.up * y;
             }
         }
         else
         {
             if(y > 0f)
             {
-                moveVelocity = playerBody.up * y;
+                moveVelocity = gameObject.transform.up * y;
             }
             else
             {
-                moveVelocity = playerBody.up * y + playerBody.forward * y;
+                moveVelocity = gameObject.transform.up * y + gameObject.transform.forward * y;
             }
         }
 
@@ -252,7 +251,7 @@ public class PlayerMovement : MonoBehaviour
         {
             Ray ray = new Ray();
             RaycastHit hit;
-            ray.origin = playerBody.position;
+            ray.origin = gameObject.transform.position;
             ray.direction = Vector3.up;
             if (!Physics.Raycast(ray, out hit, characterController.height - 1.2f, -1, QueryTriggerInteraction.Ignore))
             {
@@ -271,7 +270,7 @@ public class PlayerMovement : MonoBehaviour
         {
             groundCheck.localPosition = new Vector3(0f, groundCheck.localPosition.y + (characterController.height - crouchHeight) * 0.5f, 0f);
             characterController.height = crouchHeight;
-            playerBody.position = new Vector3(playerBody.position.x, playerBody.position.y * 0.5f, playerBody.position.z);
+            gameObject.transform.position = new Vector3(gameObject.transform.position.x, gameObject.transform.position.y * 0.5f, gameObject.transform.position.z);
             isCrouching = true;
 
             audioManager.playCollectionSound2D("Sound_Player_Crouch", true, 0f);
@@ -280,7 +279,7 @@ public class PlayerMovement : MonoBehaviour
         {
             Ray ray = new Ray();
             RaycastHit hit;
-            ray.origin = playerBody.position;
+            ray.origin = gameObject.transform.position;
             ray.direction = Vector3.up;
             if (!Physics.Raycast(ray, out hit, characterController.height - 0.1f, -1, QueryTriggerInteraction.Ignore))
             {

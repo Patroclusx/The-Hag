@@ -18,11 +18,11 @@ TagManager:
   - Player
   - Item
   - Object
+  - ObjectCarried
   - Ground
-  - 
   - Door
-  - ObjectCarry
   - Window
+  - 
   - 
   - 
   - 

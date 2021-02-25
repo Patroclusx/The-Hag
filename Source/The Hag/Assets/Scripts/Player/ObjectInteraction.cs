@@ -6,7 +6,7 @@
 
 public class ObjectInteraction : MonoBehaviour
 {
-    public Transform player;
+    public PlayerMovement playerMovement;
     public Camera mainCamera;
     public MouseLook mouseLook;
     public LayerMask ignoredLayer;
@@ -15,7 +15,6 @@ public class ObjectInteraction : MonoBehaviour
     Vector3 defaultScale;
     float defaultDrag = 0f;
     float defaultAngularDrag = 0f;
-    int defaultLayer = 0;
 
     [HideInInspector]
     public bool carryingObject = false;
@@ -32,7 +31,7 @@ public class ObjectInteraction : MonoBehaviour
         {
             if (!carryingObject)
             {
-                if (PlayerStats.canInteract && Input.GetKeyDown(KeyCode.Mouse0))
+                if (PlayerStats.canInteract && Input.GetKeyDown(KeyCode.Mouse0) && !checkObjUnderPlayer())
                 {
                     pickUpObject();
                 }
@@ -93,13 +92,12 @@ public class ObjectInteraction : MonoBehaviour
                 defaultScale = objectInHand.transform.localScale;
                 defaultDrag = objectInHandRB.drag;
                 defaultAngularDrag = objectInHandRB.angularDrag;
-                defaultLayer = objectInHand.layer;
 
                 //Set object params
                 calcDistanceBySize();
                 objectInHand.transform.parent = gameObject.transform;
-                objectInHand.layer = LayerMask.NameToLayer("ObjectCarry");
                 objectInHandRB.useGravity = false;
+                objectInHand.layer = LayerMask.NameToLayer("ObjectCarried");
                 stopObjectForces();
 
                 //Set hand params
@@ -130,7 +128,7 @@ public class ObjectInteraction : MonoBehaviour
         }
 
         //Throw object
-        if (Input.GetButtonDown("Fire2"))
+        if (Input.GetMouseButtonDown(1))
         {
             dropObj();
             objectInHandRB.AddForce(mainCamera.transform.forward * PlayerStats.throwForce);
@@ -144,10 +142,10 @@ public class ObjectInteraction : MonoBehaviour
 
         //Reset object back to default
         objectInHand.transform.parent = defaultParent;
+        objectInHand.layer = LayerMask.NameToLayer("Object");
         objectInHand.transform.localScale = defaultScale;
         objectInHandRB.drag = defaultDrag;
         objectInHandRB.angularDrag = defaultAngularDrag;
-        objectInHand.layer = defaultLayer;
         objectInHandRB.useGravity = true;
 
         //Reset hand
@@ -160,7 +158,7 @@ public class ObjectInteraction : MonoBehaviour
     {
         Vector3 movementVector = Vector3.MoveTowards(objectInHand.transform.position, gameObject.transform.position, 1f);
 
-        if (Vector3.Distance(objectInHand.transform.position, movementVector) > 0f)
+        if (Vector3.Distance(objectInHand.transform.position, movementVector) > 0.001f)
         {
             objectInHandRB.drag = 40f;
             objectInHandRB.angularDrag = 40f;
@@ -207,9 +205,11 @@ public class ObjectInteraction : MonoBehaviour
         Vector3 objPosition = objectInHand.transform.position;
         Vector3 handPosition = gameObject.transform.position;
 
+        float objDistance = Vector3.Distance(objPosition, cameraPosition);
+        float handDistance = Vector3.Distance(handPosition, cameraPosition);
+
         //Too far from player
-        float dist = Vector3.Distance(objPosition, cameraPosition);
-        if (dist > PlayerStats.reachDistance + 0.45f)
+        if (objDistance > PlayerStats.reachDistance + 0.45f)
         {
             dropObject = true;
         }
@@ -217,8 +217,8 @@ public class ObjectInteraction : MonoBehaviour
         //Object inbetween
         RaycastHit hitInfo1;
         RaycastHit hitInfo2;
-        bool hit1 = Physics.Raycast(cameraPosition, objPosition - cameraPosition, out hitInfo1, PlayerStats.reachDistance, ~ignoredLayer, QueryTriggerInteraction.Ignore);
-        bool hit2 = Physics.Raycast(cameraPosition, handPosition - cameraPosition, out hitInfo2, PlayerStats.reachDistance, ~ignoredLayer, QueryTriggerInteraction.Ignore);
+        bool hit1 = Physics.Raycast(cameraPosition, objPosition - cameraPosition, out hitInfo1, objDistance, ~ignoredLayer, QueryTriggerInteraction.Ignore);
+        bool hit2 = Physics.Raycast(cameraPosition, handPosition - cameraPosition, out hitInfo2, handDistance, ~ignoredLayer, QueryTriggerInteraction.Ignore);
         if (hit1 && hit2)
         {
             if (!hitInfo1.transform.gameObject.Equals(objectInHand) && !hitInfo2.transform.gameObject.Equals(objectInHand))
@@ -227,11 +227,33 @@ public class ObjectInteraction : MonoBehaviour
             }
         }
 
+        //Object under player
+        if (checkObjUnderPlayer())
+        {
+            dropObject = true;
+        }
+
         //Too far off screen
         Plane[] planes = GeometryUtility.CalculateFrustumPlanes(Camera.main);
         if (!GeometryUtility.TestPlanesAABB(planes, objectInHand.GetComponent<Collider>().bounds))
         {
             dropObject = true;
         }
+    }
+
+    bool checkObjUnderPlayer()
+    {
+        Vector3 cameraPosition = mainCamera.transform.position;
+        Vector3 playerPosition = playerMovement.transform.position;
+
+        float playerDistance = Vector3.Distance(playerPosition, cameraPosition);
+
+        RaycastHit hitInfo;
+        if (Physics.Raycast(playerPosition, Vector3.down, out hitInfo, playerDistance, LayerMask.GetMask("Object"), QueryTriggerInteraction.Ignore))
+        {
+            return true;
+        }
+
+        return false;
     }
 }
