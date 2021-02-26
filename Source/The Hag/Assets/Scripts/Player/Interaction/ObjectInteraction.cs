@@ -18,7 +18,7 @@ public class ObjectInteraction : MonoBehaviour
 
     [HideInInspector]
     public bool carryingObject = false;
-    bool dropObject = false;
+    bool isObjectGrabbed = false;
     float objDistanceBySize;
     Vector3 lastPosition;
     Vector3 lastVelocity;
@@ -27,6 +27,21 @@ public class ObjectInteraction : MonoBehaviour
 
     void Update()
     {
+        if (isObjectGrabbed)
+        {
+            if (Input.GetKeyUp(KeyCode.Mouse0))
+            {
+                if (carryingObject)
+                {
+                    dropObj();
+                }
+
+                isObjectGrabbed = false;
+                mouseLook.isInteracting = false;
+                PlayerStats.canInteract = true;
+            }
+        }
+
         if (Input.GetKey(KeyCode.Mouse0))
         {
             if (!carryingObject)
@@ -43,7 +58,7 @@ public class ObjectInteraction : MonoBehaviour
                 //Object rotation in hand
                 if (Input.GetKey(KeyCode.R))
                 {
-                    mouseLook.isEnabled = false;
+                    mouseLook.isInteracting = true;
 
                     float mouseX = Input.GetAxis("Mouse X") * 2f;
                     float mouseY = Input.GetAxis("Mouse Y") * 2f;
@@ -53,19 +68,9 @@ public class ObjectInteraction : MonoBehaviour
                 }
                 else if (Input.GetKeyUp(KeyCode.R))
                 {
-                    mouseLook.isEnabled = true;
+                    mouseLook.isInteracting = false;
                 }
             }
-        }
-        else if(Input.GetKeyUp(KeyCode.Mouse0))
-        {
-            if (carryingObject)
-            {
-                dropObj();
-            }
-
-            mouseLook.isEnabled = true;
-            PlayerStats.canInteract = true;
         }
     }
 
@@ -100,9 +105,8 @@ public class ObjectInteraction : MonoBehaviour
                 objectInHand.layer = LayerMask.NameToLayer("ObjectCarried");
                 stopObjectForces();
 
-                //Set hand params
-                dropObject = false;
                 carryingObject = true;
+                isObjectGrabbed = true;
                 PlayerStats.canInteract = false;
             }
         }
@@ -118,14 +122,7 @@ public class ObjectInteraction : MonoBehaviour
         lastVelocity = getVelocity();
 
         //If object cannot be held anymore drop it
-        if (dropObject)
-        {
-            dropObj();
-        }
-        else
-        {
-            checkObjDrop();
-        }
+        checkObjDrop();
 
         //Throw object
         if (Input.GetMouseButtonDown(1))
@@ -151,7 +148,6 @@ public class ObjectInteraction : MonoBehaviour
         //Reset hand
         gameObject.transform.position = gameObject.transform.position - gameObject.transform.forward * objDistanceBySize;
         carryingObject = false;
-        dropObject = false;
     }
 
     void centerHandOject()
@@ -211,7 +207,7 @@ public class ObjectInteraction : MonoBehaviour
         //Too far from player
         if (objDistance > PlayerStats.reachDistance + 0.45f)
         {
-            dropObject = true;
+            dropObj();
         }
 
         //Object inbetween
@@ -223,21 +219,21 @@ public class ObjectInteraction : MonoBehaviour
         {
             if (!hitInfo1.transform.gameObject.Equals(objectInHand) && !hitInfo2.transform.gameObject.Equals(objectInHand))
             {
-                dropObject = true;
+                dropObj();
             }
         }
 
         //Object under player
         if (checkObjUnderPlayer())
         {
-            dropObject = true;
+            dropObj();
         }
 
         //Too far off screen
         Plane[] planes = GeometryUtility.CalculateFrustumPlanes(Camera.main);
         if (!GeometryUtility.TestPlanesAABB(planes, objectInHand.GetComponent<Collider>().bounds))
         {
-            dropObject = true;
+            dropObj();
         }
     }
 

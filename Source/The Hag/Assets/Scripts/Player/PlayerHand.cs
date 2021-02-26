@@ -15,7 +15,7 @@ public class PlayerHand : MonoBehaviour
 
     void Update()
     {
-        if (mouseLook.isEnabled)
+        if (!mouseLook.isInteracting && !mouseLook.isInInventory)
         {
             handSway();
         }

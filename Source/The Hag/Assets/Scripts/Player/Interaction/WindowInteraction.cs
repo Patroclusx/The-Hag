@@ -42,11 +42,11 @@ public class WindowInteraction : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetKeyUp(KeyCode.Mouse0) || !isPlayerNearby)
+        if (isWindowGrabbed)
         {
-            if (isWindowGrabbed)
+            if (Input.GetKeyUp(KeyCode.Mouse0) || !isPlayerNearby)
             {
-                mouseLook.isEnabled = true;
+                mouseLook.isInteracting = false;
                 isWindowGrabbed = false;
                 PlayerStats.canInteract = true;
             }
@@ -117,7 +117,7 @@ public class WindowInteraction : MonoBehaviour
         {
             if (hitInfo.transform.gameObject.Equals(windowObject))
             {
-                mouseLook.isEnabled = false;
+                mouseLook.isInteracting = true;
                 PlayerStats.canInteract = false;
                 isWindowGrabbed = true;
             }

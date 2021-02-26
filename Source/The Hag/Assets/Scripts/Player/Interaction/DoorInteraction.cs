@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections;
 using UnityEngine;
 
 public class DoorInteraction : MonoBehaviour
@@ -10,10 +8,10 @@ public class DoorInteraction : MonoBehaviour
     public float maxOpeningDegrees = 120f;
     public bool isLeftSided;
     public bool isLocked;
+    GameObject player;
     MouseLook mouseLook;
     Animator doorHandleAnimator;
 
-    bool isPlayerNearby = false;
     bool isDoorGrabbed = false;
     bool isSlammed = false;
 
@@ -37,19 +35,10 @@ public class DoorInteraction : MonoBehaviour
         gameObject.layer = LayerMask.NameToLayer("Door");
     }
 
-    void Awake()
-    {
-        doorObject = gameObject;
-
-        CapsuleCollider CC = doorObject.AddComponent<CapsuleCollider>();
-        CC.isTrigger = true;
-        CC.direction = 0;
-        CC.radius = PlayerStats.reachDistance - 0.2f;
-        CC.height = PlayerStats.reachDistance + 1.4f;
-    }
-
     void Start()
     {
+        doorObject = gameObject;
+        player = GameObject.FindGameObjectWithTag("Player");
         mouseLook = Camera.main.GetComponent<MouseLook>();
         doorHandleAnimator = doorObject.GetComponentInChildren<Animator>();
         defaultClosedRotation = doorObject.transform.parent.rotation;
@@ -58,11 +47,11 @@ public class DoorInteraction : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetKeyUp(KeyCode.Mouse0) || !isPlayerNearby || isSlammed)
+        if (isDoorGrabbed)
         {
-            if (isDoorGrabbed)
+            if (Input.GetKeyUp(KeyCode.Mouse0) || !isPlayerNearby() || isSlammed)
             {
-                mouseLook.isEnabled = true;
+                mouseLook.isInteracting = false ;
 
                 applyVelocityToDoor(1f);
 
@@ -111,7 +100,7 @@ public class DoorInteraction : MonoBehaviour
             }
             else
             {
-                if (!isLocked && !isSlammed)
+                if (!isLocked)
                 {
                     if (PlayerStats.canInteract && Input.GetKeyDown(KeyCode.Mouse0))
                     {
@@ -130,6 +119,16 @@ public class DoorInteraction : MonoBehaviour
         {
             closeDoor();
         }
+    }
+
+    //Check if player is near the door
+    bool isPlayerNearby()
+    {
+        Vector3 doorOrigin = transform.position;
+        Vector3 doorEdge = transform.position + transform.right * (transform.GetComponent<MeshFilter>().sharedMesh.bounds.size.x - 0.1f);
+        bool playerNear = Physics.CheckCapsule(doorOrigin, doorEdge, PlayerStats.reachDistance - 0.1f, LayerMask.GetMask("Player"), QueryTriggerInteraction.Ignore);
+
+        return playerNear;
     }
 
     //Check if door is near to closed position by specified ammount
@@ -153,22 +152,6 @@ public class DoorInteraction : MonoBehaviour
         toRotation = Quaternion.Euler(doorObject.transform.eulerAngles.x, defaultClosedRotation.eulerAngles.y, doorObject.transform.eulerAngles.z);
 
         doorObject.transform.rotation = Quaternion.Slerp(fromRotation, toRotation, 0.1f);
-    }
-
-    //Check if the player is near the door
-    void OnTriggerEnter(Collider other)
-    {
-        if(other.tag == "Player")
-        {
-            isPlayerNearby = true;
-        }
-    }
-    void OnTriggerExit(Collider other)
-    {
-        if (other.tag == "Player")
-        {
-            isPlayerNearby = false;
-        }
     }
 
     //Clamps rotation to min and max door openings
@@ -428,8 +411,9 @@ public class DoorInteraction : MonoBehaviour
                     }
                 }
 
-                mouseLook.isEnabled = false;
+                mouseLook.isInteracting = true;
                 PlayerStats.canInteract = false;
+                isSlammed = false;
                 isDoorGrabbed = true;
             }
         }
