@@ -15,30 +15,33 @@ public class SceneLoader : MonoBehaviour
         if (SceneManager.GetActiveScene().buildIndex == 0)
         {
             Cursor.visible = false;
-
+        }
+        else if (SceneManager.GetActiveScene().buildIndex == 1)
+        {
             if (Input.GetButtonDown("Jump") && !isSkipped)
             {
-                LoadNextScene();
+                LoadNextScene(4f);
                 isSkipped = true;
             }
         }
-        else if(SceneManager.GetActiveScene().buildIndex == 1)
+        else if(SceneManager.GetActiveScene().buildIndex == 2)
         {
             Cursor.visible = true;
         }
     }
 
-    public void LoadNextScene()
+    public void LoadNextScene(float transitionLenghtInSeconds)
     {
-        audioManager.fadeOutAllAudio(2.5f);
-        StartCoroutine(LoadLevel(SceneManager.GetActiveScene().buildIndex + 1));
+        if(audioManager != null)
+            audioManager.fadeOutAllAudio(2.5f);
+        StartCoroutine(LoadLevel(SceneManager.GetActiveScene().buildIndex + 1, transitionLenghtInSeconds));
     }
 
-    IEnumerator LoadLevel(int index)
+    IEnumerator LoadLevel(int index, float transitionLenghtInSeconds)
     {
         transition.SetTrigger("EndFade");
 
-        yield return new WaitForSeconds(4f);
+        yield return new WaitForSeconds(transitionLenghtInSeconds);
 
         SceneManager.LoadScene(index);
     }
