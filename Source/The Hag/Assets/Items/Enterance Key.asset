@@ -13,5 +13,6 @@ MonoBehaviour:
   m_Name: Enterance Key
   m_EditorClassIdentifier: 
   name: Enterance Key
-  icon: {fileID: 21300000, guid: 689d61fa72f3d7249ad092b8f829e2c0, type: 3}
-  usableGameObjects: []
+  icon: {fileID: 21300000, guid: beab580baaca1be46877855ba998ead9, type: 3}
+  usableGameObjects:
+  - {fileID: 0}

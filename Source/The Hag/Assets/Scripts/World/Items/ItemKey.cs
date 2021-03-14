@@ -5,7 +5,6 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "New Key", menuName = "Inventory/Key")]
 public class ItemKey : Item
 {
-
     public override bool use(GameObject hoveredObject)
     {
         if (base.use(hoveredObject))
@@ -14,6 +13,7 @@ public class ItemKey : Item
             if (doorInteraction != null)
             {
                 doorInteraction.isLocked = false;
+                Inventory.instance.removeItem(this);
                 return true;
             }
         }

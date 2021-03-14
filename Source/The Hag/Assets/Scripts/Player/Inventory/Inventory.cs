@@ -31,9 +31,15 @@ public class Inventory : MonoBehaviour
         itemsList.Add(itemObject);
 
         if (onItemChangedCallback != null)
-        {
             onItemChangedCallback.Invoke();
-        }
+    }
+
+    public void removeItem(Item itemObject)
+    {
+        itemsList.Remove(itemObject);
+
+        if (onItemChangedCallback != null)
+            onItemChangedCallback.Invoke();
     }
 
     public Item getItem(int index)
