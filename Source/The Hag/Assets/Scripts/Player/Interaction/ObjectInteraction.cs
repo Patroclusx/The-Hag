@@ -1,9 +1,5 @@
 ﻿using UnityEngine;
 
-/*TODO
- * Fix wall clipping on sudden motion
- */
-
 public class ObjectInteraction : MonoBehaviour
 {
     public PlayerMovement playerMovement;
@@ -15,21 +11,30 @@ public class ObjectInteraction : MonoBehaviour
     Vector3 defaultScale;
     float defaultDrag = 0f;
     float defaultAngularDrag = 0f;
+    float defaultPlayerWalkSpeed;
 
     [HideInInspector]
     public bool carryingObject = false;
+    [HideInInspector]
+    public bool carryingHeavyObject = false;
     bool isObjectGrabbed = false;
+    float maxObjectWeight = 5f;
     float objDistanceBySize;
     Vector3 lastPosition;
     Vector3 lastVelocity;
     GameObject objectInHand;
     Rigidbody objectInHandRB;
 
+    void Start()
+    {
+        defaultPlayerWalkSpeed = playerMovement.playerStats.walkSpeed;
+    }
+
     void Update()
     {
         if (isObjectGrabbed)
         {
-            if (Input.GetKeyUp(KeyCode.Mouse0))
+            if (Input.GetKeyUp(KeyCode.Mouse0) || !carryingObject)
             {
                 if (carryingObject)
                 {
@@ -53,22 +58,30 @@ public class ObjectInteraction : MonoBehaviour
             }
             else
             {
-                carryObject();
+                if (objectInHandRB.mass < maxObjectWeight)
+                {
+                    carryObject();
 
-                //Object rotation in hand
-                if (Input.GetKey(KeyCode.R))
+                    //Object rotation in hand
+                    if (Input.GetKey(KeyCode.R))
+                    {
+                        mouseLook.isInteracting = true;
+
+                        float mouseX = Input.GetAxis("Mouse X") * 2f;
+                        float mouseY = Input.GetAxis("Mouse Y") * 2f;
+
+                        objectInHand.transform.Rotate(mainCamera.transform.up, -mouseX, Space.World);
+                        objectInHand.transform.Rotate(mainCamera.transform.right, mouseY, Space.World);
+                    }
+                    else if (Input.GetKeyUp(KeyCode.R))
+                    {
+                        mouseLook.isInteracting = false;
+                    }
+                }
+                else
                 {
                     mouseLook.isInteracting = true;
-
-                    float mouseX = Input.GetAxis("Mouse X") * 2f;
-                    float mouseY = Input.GetAxis("Mouse Y") * 2f;
-
-                    objectInHand.transform.Rotate(mainCamera.transform.up, -mouseX, Space.World);
-                    objectInHand.transform.Rotate(mainCamera.transform.right, mouseY, Space.World);
-                }
-                else if (Input.GetKeyUp(KeyCode.R))
-                {
-                    mouseLook.isInteracting = false;
+                    dragObject();
                 }
             }
         }
@@ -100,10 +113,19 @@ public class ObjectInteraction : MonoBehaviour
 
                 //Set object params
                 calcDistanceBySize();
-                objectInHand.transform.parent = gameObject.transform;
-                objectInHandRB.useGravity = false;
-                objectInHand.layer = LayerMask.NameToLayer("ObjectCarried");
+                if (objectInHandRB.mass < maxObjectWeight)
+                {
+                    objectInHand.transform.parent = gameObject.transform;
+                    objectInHandRB.useGravity = false;
+                }
+                else
+                {
+                    playerMovement.playerStats.walkSpeed = playerMovement.playerStats.walkSpeed * 0.5f;
+                    playerMovement.playerStats.setCanRun(false);
+                    carryingHeavyObject = true;
+                }
                 stopObjectForces();
+                objectInHand.layer = LayerMask.NameToLayer("ObjectCarried");
 
                 carryingObject = true;
                 isObjectGrabbed = true;
@@ -132,6 +154,32 @@ public class ObjectInteraction : MonoBehaviour
         }
     }
 
+    void dragObject()
+    {
+        //Move object with player
+        Vector3 objPosition = objectInHand.transform.position;
+        Vector3 toPosition = objPosition + playerMovement.moveVelocity * playerMovement.playerSpeed;
+
+        if(playerMovement.isMoving())
+            objectInHand.transform.position = Vector3.Lerp(objPosition, toPosition, Time.deltaTime);
+
+        //If object out of hands than let go
+        bool heavyHit = Physics.Raycast(Camera.main.transform.position, Camera.main.transform.forward, PlayerStats.reachDistance, LayerMask.GetMask("ObjectCarried"), QueryTriggerInteraction.Ignore);
+        if (!heavyHit)
+        {
+            dropObj();
+        }
+
+        //Push object away
+        if (Input.GetMouseButtonDown(1))
+        {
+            float force = 6f;
+
+            dropObj();
+            objectInHandRB.AddForce(playerMovement.transform.forward * force * PlayerStats.throwForce);
+        }
+    }
+
     void dropObj()
     {
         //If velocity persists, apply that to the item
@@ -145,9 +193,15 @@ public class ObjectInteraction : MonoBehaviour
         objectInHandRB.angularDrag = defaultAngularDrag;
         objectInHandRB.useGravity = true;
 
-        //Reset hand
+        //Reset player hand and stats
         gameObject.transform.position = gameObject.transform.position - gameObject.transform.forward * objDistanceBySize;
         carryingObject = false;
+        if (carryingHeavyObject)
+        {
+            playerMovement.playerStats.walkSpeed = defaultPlayerWalkSpeed;
+            playerMovement.playerStats.setCanRun(true);
+        }
+        carryingHeavyObject = false;
     }
 
     void centerHandOject()
@@ -244,8 +298,7 @@ public class ObjectInteraction : MonoBehaviour
 
         float playerDistance = Vector3.Distance(playerPosition, cameraPosition);
 
-        RaycastHit hitInfo;
-        if (Physics.Raycast(playerPosition, Vector3.down, out hitInfo, playerDistance, LayerMask.GetMask("Object"), QueryTriggerInteraction.Ignore))
+        if (Physics.Raycast(playerPosition, Vector3.down, playerDistance, LayerMask.GetMask("Object") | LayerMask.GetMask("ObjectCarried"), QueryTriggerInteraction.Ignore))
         {
             return true;
         }

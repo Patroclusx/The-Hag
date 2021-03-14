@@ -79,7 +79,6 @@ public class WindowInteraction : MonoBehaviour
                 else
                 {
                     //TODO: Tell player window is locked
-                    //      Make window unlockable with key, item or world object
                 }
             }
         }

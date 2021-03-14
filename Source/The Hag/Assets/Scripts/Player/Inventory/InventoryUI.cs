@@ -22,10 +22,9 @@ public class InventoryUI : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (!mouseLook.isInteracting && Input.GetKeyDown(KeyCode.E))
+        if ((PlayerStats.canInteract || mouseLook.isInInventory) && Input.GetKeyDown(KeyCode.E))
         {
-            inventoryUI.SetActive(!inventoryUI.activeSelf);
-            mouseLook.toggleInventoryCursor();
+            toggleInventory(false);
         }
     }
 
@@ -38,5 +37,11 @@ public class InventoryUI : MonoBehaviour
                 slots[i].addItem(inventory.itemsList[i]);
             }
         }
+    }
+
+    public void toggleInventory(bool isItemSelected)
+    {
+        inventoryUI.SetActive(!inventoryUI.activeSelf);
+        mouseLook.toggleInventoryCursor(isItemSelected);
     }
 }

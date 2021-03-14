@@ -15,6 +15,13 @@ public class PlayerStats : MonoBehaviour
     [System.NonSerialized]
     public static float throwForce = 180f;
 
+    [Header("Player Speed")]
+    //Speed
+    public float walkSpeed = 2f;
+    public float sprintSpeed = 4f;
+    public float climbSpeed = 1f;
+
+    [Header("Player Stamina")]
     //Stamina
     public bool isStaminaDrainEnabled = true;
     public float playerStamina = 100f;
@@ -27,11 +34,8 @@ public class PlayerStats : MonoBehaviour
     [HideInInspector]
     public bool canJump = true;
 
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+    bool canRecoverRun = true;
+    bool canRecoverJump = true;
 
     // Update is called once per frame
     void Update()
@@ -98,14 +102,28 @@ public class PlayerStats : MonoBehaviour
             //Run recover
             if (playerStamina >= staminaSpeed * 2f && !playerMovement.isRunning)
             {
-                canRun = true;
+                if(canRecoverRun)
+                    canRun = true;
             }
 
             //Jump recover
             if (playerStamina >= staminaSpeed && !playerMovement.isJumping)
             {
-                canJump = true;
+                if(canRecoverJump)
+                    canJump = true;
             }
         }
+    }
+
+    public void setCanRun(bool canRun)
+    {
+        this.canRun = canRun;
+        canRecoverRun = canRun;
+    }
+
+    public void setCanJump(bool canJump)
+    {
+        this.canJump = canJump;
+        canRecoverJump = canJump;
     }
 }

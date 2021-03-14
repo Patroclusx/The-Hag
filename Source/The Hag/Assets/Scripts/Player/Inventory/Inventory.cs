@@ -7,6 +7,9 @@ public class Inventory : MonoBehaviour
     public static Inventory instance;
     public List<Item> itemsList = new List<Item>();
 
+    [HideInInspector]
+    public Item selectedItem;
+
     public int maxSpace = 10;
 
     public delegate void OnItemChanged();

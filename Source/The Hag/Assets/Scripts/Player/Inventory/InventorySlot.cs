@@ -14,11 +14,19 @@ public class InventorySlot : MonoBehaviour
         icon.enabled = true;
     }
 
-    public void useItem()
+    public void selectItem()
     {
         if(item != null)
         {
-            item.use();
+            if (item.usableGameObjects.Count == 0)
+            {
+                item.use(null);
+            }
+            else
+            {
+                Inventory.instance.selectedItem = item;
+            }
+            GetComponentInParent<InventoryUI>().toggleInventory(true);
         }
     }
 }

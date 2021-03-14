@@ -25,7 +25,7 @@ public class HeadBobbing : MonoBehaviour
         if ((playerMovement.isWalking || playerMovement.isRunning) && (Mathf.Abs(playerMovement.moveVelocity.x) > 0.35f || Mathf.Abs(playerMovement.moveVelocity.z) > 0.35f))
         {
             //Player is moving
-            timer += Time.deltaTime * (playerMovement.isRunning ? runningBobbingSpeed : walkingBobbingSpeed) * (playerMovement.isCrouching ? 0.5f : 1f);
+            timer += Time.deltaTime * (playerMovement.isRunning ? runningBobbingSpeed : walkingBobbingSpeed * playerMovement.playerSpeed * 0.5f);
             transform.localPosition = new Vector3(transform.localPosition.x, defaultPosY + Mathf.Sin(timer) * bobbingAmount, transform.localPosition.z);
             transform.localPosition = new Vector3(defaultPosX + Mathf.Sin(timer * 0.5f) * bobbingAmount, transform.localPosition.y, transform.localPosition.z);
         }

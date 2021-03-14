@@ -42,7 +42,7 @@ public class MouseLook : MonoBehaviour
         player.Rotate(Vector3.up * mouseX);
     }
 
-    public void toggleInventoryCursor()
+    public void toggleInventoryCursor(bool isItemSelected)
     {
         isInInventory = !isInInventory;
 
@@ -55,7 +55,8 @@ public class MouseLook : MonoBehaviour
         }
         else
         {
-            PlayerStats.canInteract = true;
+            if(!isItemSelected)
+                PlayerStats.canInteract = true;
 
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;

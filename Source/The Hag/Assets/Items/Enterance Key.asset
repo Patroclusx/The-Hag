@@ -9,8 +9,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1859f2177d69acb4ea3a0845696853f8, type: 3}
-  m_Name: Key
+  m_Script: {fileID: 11500000, guid: a78d621cdacd7c64f9ae1d8590b4bd3d, type: 3}
+  m_Name: Enterance Key
   m_EditorClassIdentifier: 
-  name: Test Key
+  name: Enterance Key
   icon: {fileID: 21300000, guid: 689d61fa72f3d7249ad092b8f829e2c0, type: 3}
+  usableGameObjects: []

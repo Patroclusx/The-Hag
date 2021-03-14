@@ -3,13 +3,33 @@
 public class ItemInteraction : MonoBehaviour
 {
     public PlayerMovement playerMovement;
+
     GameObject itemInHand;
+    Inventory inventory;
+
+    void Start()
+    {
+        inventory = Inventory.instance;
+    }
 
     void Update()
     {
         if (Input.GetMouseButtonDown(0))
         {
-            pickUpItem();
+            Item selectedItem = inventory != null ? inventory.selectedItem : null; ;
+            if (selectedItem != null)
+            {
+                RaycastHit hitInfo;
+                bool rayHit = Physics.Raycast(Camera.main.transform.position, Camera.main.transform.forward, out hitInfo, PlayerStats.reachDistance, ~LayerMask.GetMask("Player"), QueryTriggerInteraction.Ignore);
+                selectedItem.use(rayHit ? hitInfo.transform.gameObject : null);
+
+                inventory.selectedItem = null;
+                PlayerStats.canInteract = true;
+            }
+            else
+            {
+                pickUpItem();
+            }
         }
     }
 
@@ -24,10 +44,12 @@ public class ItemInteraction : MonoBehaviour
             {
                 if (Inventory.instance.hasSpace())
                 {
-                    Item item = itemInHand.GetComponent<ItemObjHolder>().item;
+                    ItemObjHolder itemObjHolder = itemInHand.GetComponent<ItemObjHolder>();
+                    Item item = itemObjHolder != null ? itemObjHolder.item : null;
                     if (item != null)
                     {
-                        Inventory.instance.addItem(itemInHand.GetComponent<ItemObjHolder>().item);
+                        Inventory.instance.addItem(item);
+                        item.usableGameObjects = itemObjHolder.usableGameObjects;
                         Destroy(itemInHand);
                     }
                     else

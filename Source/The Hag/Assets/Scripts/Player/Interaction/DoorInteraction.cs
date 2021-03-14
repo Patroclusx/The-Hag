@@ -110,7 +110,6 @@ public class DoorInteraction : MonoBehaviour
                 else
                 {
                     //TODO: Tell player door is locked
-                    //      Make door unlockable with key, item or world object
                 }
             }
         }
