@@ -124,8 +124,9 @@ public class DoorInteraction : MonoBehaviour
     bool isPlayerNearby()
     {
         Vector3 doorOrigin = transform.position;
-        Vector3 doorEdge = transform.position + transform.right * (transform.GetComponent<MeshFilter>().sharedMesh.bounds.size.x - 0.1f);
-        bool playerNear = Physics.CheckCapsule(doorOrigin, doorEdge, PlayerStats.reachDistance - 0.1f, LayerMask.GetMask("Player"), QueryTriggerInteraction.Ignore);
+        Vector3 doorEdgeRight = doorOrigin + transform.right * (transform.GetComponent<MeshFilter>().sharedMesh.bounds.size.x - 0.1f);
+        Vector3 doorEdgeLeft = doorOrigin - transform.right * (transform.GetComponent<MeshFilter>().sharedMesh.bounds.size.x - 0.1f);
+        bool playerNear = Physics.CheckCapsule(doorOrigin, isLeftSided ? doorEdgeLeft : doorEdgeRight, PlayerStats.reachDistance - 0.1f, LayerMask.GetMask("Player"), QueryTriggerInteraction.Ignore);
 
         return playerNear;
     }

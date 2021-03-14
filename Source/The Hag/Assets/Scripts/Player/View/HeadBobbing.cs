@@ -37,4 +37,9 @@ public class HeadBobbing : MonoBehaviour
             transform.localPosition = new Vector3(Mathf.Lerp(transform.localPosition.x, defaultPosX, Time.deltaTime * runningBobbingSpeed), transform.localPosition.y, transform.localPosition.z);
         }
     }
+
+    public void updateDefaultPosY(float newDefaultPosY)
+    {
+        defaultPosY = newDefaultPosY;
+    }
 }

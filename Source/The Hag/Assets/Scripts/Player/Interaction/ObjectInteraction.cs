@@ -120,7 +120,7 @@ public class ObjectInteraction : MonoBehaviour
                 }
                 else
                 {
-                    playerMovement.playerStats.walkSpeed = playerMovement.playerStats.walkSpeed * 0.5f;
+                    playerMovement.playerStats.walkSpeed = playerMovement.playerStats.walkSpeed * 0.7f - (1f - 5f / objectInHandRB.mass);
                     playerMovement.playerStats.setCanRun(false);
                     carryingHeavyObject = true;
                 }

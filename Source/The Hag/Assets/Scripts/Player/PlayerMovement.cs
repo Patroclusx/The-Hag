@@ -220,11 +220,12 @@ public class PlayerMovement : MonoBehaviour
     //Returns true if player is walking into a wall
     bool checkForWallHit()
     {
-        float offset = 0.2f;
-        Vector3 checkPosition = gameObject.transform.position - new Vector3(0f, characterController.bounds.extents.y - characterController.stepOffset, 0f);
+        float rayHeightOffset = 0.1f;
+        float rayLenghtOffset = 0.14f;
+        Vector3 checkPosition = gameObject.transform.position - new Vector3(0f, characterController.bounds.extents.y - characterController.stepOffset - rayHeightOffset, 0f);
 
         RaycastHit rayHit;
-        bool checkWall = Physics.Raycast(checkPosition, moveVelocity, out rayHit, (characterController.radius / 2f) + offset, ~LayerMask.GetMask("Player"), QueryTriggerInteraction.Ignore);
+        bool checkWall = Physics.Raycast(checkPosition, moveVelocity, out rayHit, (characterController.radius / 2f) + rayLenghtOffset, ~LayerMask.GetMask("Player"), QueryTriggerInteraction.Ignore);
 
         return checkWall;
     }
@@ -255,7 +256,7 @@ public class PlayerMovement : MonoBehaviour
             Ray ray = new Ray();
             ray.origin = gameObject.transform.position;
             ray.direction = Vector3.up;
-            if (!Physics.Raycast(ray, characterController.height - 1.2f, -1, QueryTriggerInteraction.Ignore))
+            if (!Physics.Raycast(ray, characterController.height - 1.1f, -1, QueryTriggerInteraction.Ignore))
             {
                 characterController.stepOffset = 0f;
                 verticalVelocity.y = Mathf.Sqrt(jumpHeight * -1f * gravityForce);
@@ -270,6 +271,7 @@ public class PlayerMovement : MonoBehaviour
     {
         if (!isCrouching)
         {
+            Camera.main.transform.localPosition = new Vector3(0f, Camera.main.transform.localPosition.y - (characterController.height - crouchHeight) * 0.5f, -0.072f);
             groundCheck.localPosition = new Vector3(0f, groundCheck.localPosition.y + (characterController.height - crouchHeight) * 0.5f, 0f);
             characterController.height = crouchHeight;
             gameObject.transform.position = new Vector3(gameObject.transform.position.x, gameObject.transform.position.y * 0.5f, gameObject.transform.position.z);
@@ -282,8 +284,9 @@ public class PlayerMovement : MonoBehaviour
             Ray ray = new Ray();
             ray.origin = gameObject.transform.position;
             ray.direction = Vector3.up;
-            if (!Physics.Raycast(ray, characterController.height - 0.1f, -1, QueryTriggerInteraction.Ignore))
+            if (!Physics.Raycast(ray, characterController.height - 0.05f, -1, QueryTriggerInteraction.Ignore))
             {
+                Camera.main.transform.localPosition = new Vector3(0f, 0.74f, -0.072f); //Default camera Y
                 groundCheck.localPosition = new Vector3(0f, -0.55f, 0f); //Default ground check Y
                 characterController.height = 2f;
                 isCrouching = false;
@@ -291,6 +294,8 @@ public class PlayerMovement : MonoBehaviour
                 audioManager.playCollectionSound2D("Sound_Player_Crouch", true, 0f);
             }
         }
+
+        Camera.main.GetComponent<HeadBobbing>().updateDefaultPosY(Camera.main.transform.localPosition.y);
     }
 
     void PlayStepSound()
