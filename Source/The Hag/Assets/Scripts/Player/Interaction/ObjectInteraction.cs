@@ -160,7 +160,7 @@ public class ObjectInteraction : MonoBehaviour
         Vector3 objPosition = objectInHand.transform.position;
         Vector3 toPosition = objPosition + playerMovement.moveVelocity * playerMovement.playerSpeed;
 
-        if(playerMovement.isMoving())
+        if(playerMovement.isPlayerMoving())
             objectInHand.transform.position = Vector3.Lerp(objPosition, toPosition, Time.deltaTime);
 
         //If object out of hands than let go

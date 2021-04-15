@@ -15,13 +15,11 @@ public class Inventory : MonoBehaviour
     public delegate void OnItemChanged();
     public OnItemChanged onItemChangedCallback;
 
-    //Singleton instance
     void Awake()
     {
+        //Singleton instance
         if (instance != null)
-        {
             Debug.LogWarning("More than one instance of Inventory found!");
-        }
 
         instance = this;
     }

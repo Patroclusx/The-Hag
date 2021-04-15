@@ -4,8 +4,9 @@ public class PlayerMovement : MonoBehaviour
 {
     public CharacterController characterController;
     public PlayerStats playerStats;
-    public Transform groundCheck;
     public AudioManager audioManager;
+
+    private Vector3 defaultCameraPosition;
 
     [HideInInspector]
     public bool isWalking = false;
@@ -33,33 +34,26 @@ public class PlayerMovement : MonoBehaviour
 
     [HideInInspector]
     public bool isGrounded;
-    [HideInInspector]
-    public float groundDistanceNormal = 0.35f;
     public LayerMask groundMask;
     float defaultStepOffset;
-
-    [HideInInspector]
-    public bool isSliding = false;
-    [HideInInspector]
-    public float slopeSpeed = 0;
 
     [HideInInspector]
     public bool isClimbing = false;
 
     private void Start()
     {
+        defaultCameraPosition = Camera.main.transform.position;
         defaultStepOffset = characterController.stepOffset;
     }
 
     // Update is called once per frame
     void Update()
     {
-        //Ground check logic
-        isGrounded = Physics.CheckSphere(groundCheck.position, groundDistanceNormal, groundMask, QueryTriggerInteraction.Ignore);
+        isGrounded = characterController.isGrounded;
 
         //Movement logic 
         bool move = (Input.GetAxis("Horizontal") != 0 || Input.GetAxis("Vertical") != 0);
-        if (move && !isClimbing && !isSliding)
+        if (move && !isClimbing)
         {
             MovePlayer();
         }
@@ -84,7 +78,7 @@ public class PlayerMovement : MonoBehaviour
         }
 
         //Jumping logic
-        if (Input.GetKeyDown(KeyCode.Space) && !hasJumped && !isCrouching && !isSliding && !isClimbing)
+        if (Input.GetKeyDown(KeyCode.Space) && !hasJumped && !isCrouching && !isClimbing)
         {
             Jump();
         }
@@ -124,42 +118,9 @@ public class PlayerMovement : MonoBehaviour
                 hasJumped = false;
                 isJumping = false;
             }
-
-            Slide();
         }
 
         characterController.Move(verticalVelocity * Time.deltaTime);
-    }
-
-    private void Slide()
-    {
-        float slideSpeed = 10f;
-        RaycastHit groundHit;
-
-        bool groundRayCast = Physics.Raycast(gameObject.transform.position, Vector3.down, out groundHit, 1.2f, -1, QueryTriggerInteraction.Ignore);
-        Vector3 groundNormal = groundHit.normal;
-
-        Vector3 groundParallel = Vector3.Cross(gameObject.transform.up, groundNormal);
-        Vector3 slopeParallel = Vector3.Cross(groundParallel, groundNormal);
-
-        float currentSlope = Mathf.Round(Vector3.Angle(groundNormal, gameObject.transform.up));
-
-        if (isGrounded && groundRayCast && currentSlope > characterController.slopeLimit)
-        {
-            slopeSpeed += Time.deltaTime * (slopeParallel.magnitude + (isSliding ? 0f : (moveVelocity.magnitude * 80f))) * slideSpeed;
-            characterController.Move(slopeParallel * slopeSpeed * Time.deltaTime);
-            audioManager.playSound3D("Sound_Player_Slide", false, 0f, gameObject);
-            isSliding = true;
-        }
-        else
-        {
-            if (isSliding)
-            {
-                audioManager.fadeOutSound3D("Sound_Player_Slide", 0.35f, gameObject);
-                slopeSpeed = 0;
-                isSliding = false;
-            }
-        }
     }
 
     void MovePlayer()
@@ -171,7 +132,7 @@ public class PlayerMovement : MonoBehaviour
         {
             moveVelocity = gameObject.transform.right * x + gameObject.transform.forward * z;
 
-            //Strafe running fix
+            //Strafe running speed fix
             if (x != 0f && z != 0f)
             {
                 moveVelocity *= 0.75f;
@@ -180,7 +141,7 @@ public class PlayerMovement : MonoBehaviour
 
         if (!checkForWallHit() || hasJumped)
         {
-            //Sprinting logic (Ultimatees original comment)
+            //Sprinting logic (An Ultimatees original comment)
             if (Input.GetKey(KeyCode.LeftShift) && z >= 0.5f && !isCrouching && playerStats.canRun)
             {
                 playerSpeed = playerStats.sprintSpeed;
@@ -212,9 +173,34 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
-    public bool isMoving()
+    public bool isPlayerMoving()
     {
         return isWalking || isRunning;
+    }
+
+    void OnControllerColliderHit(ControllerColliderHit hit)
+    {
+        pushRigidBodyObjects(hit);
+    }
+
+    void pushRigidBodyObjects(ControllerColliderHit hit)
+    {
+        Rigidbody objectBody = hit.collider.attachedRigidbody;
+
+        // Not a rigidbody
+        if (objectBody == null || objectBody.isKinematic)
+            return;
+
+        // We dont want to push heavy objects or objects below us
+        if (hit.moveDirection.y < -0.3f || objectBody.mass >= 5f)
+            return;
+
+        // Calculate push direction from move direction,
+        // We only push objects to the sides never up and down
+        Vector3 pushDir = new Vector3(hit.moveDirection.x, 0, hit.moveDirection.z);
+
+        // Apply the push
+        objectBody.velocity = pushDir * 2f;
     }
 
     //Returns true if player is walking into a wall
@@ -272,7 +258,6 @@ public class PlayerMovement : MonoBehaviour
         if (!isCrouching)
         {
             Camera.main.transform.localPosition = new Vector3(0f, Camera.main.transform.localPosition.y - (characterController.height - crouchHeight) * 0.5f, -0.072f);
-            groundCheck.localPosition = new Vector3(0f, groundCheck.localPosition.y + (characterController.height - crouchHeight) * 0.5f, 0f);
             characterController.height = crouchHeight;
             gameObject.transform.position = new Vector3(gameObject.transform.position.x, gameObject.transform.position.y * 0.5f, gameObject.transform.position.z);
             isCrouching = true;
@@ -286,9 +271,8 @@ public class PlayerMovement : MonoBehaviour
             ray.direction = Vector3.up;
             if (!Physics.Raycast(ray, characterController.height - 0.05f, -1, QueryTriggerInteraction.Ignore))
             {
-                Camera.main.transform.localPosition = new Vector3(0f, 0.74f, -0.072f); //Default camera Y
-                groundCheck.localPosition = new Vector3(0f, -0.55f, 0f); //Default ground check Y
-                characterController.height = 2f;
+                Camera.main.transform.localPosition = defaultCameraPosition; //Default camera pos
+                characterController.height = 2f; //Default player height
                 isCrouching = false;
 
                 audioManager.playCollectionSound2D("Sound_Player_Crouch", true, 0f);

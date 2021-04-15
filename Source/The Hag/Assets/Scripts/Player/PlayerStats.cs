@@ -61,7 +61,7 @@ public class PlayerStats : MonoBehaviour
             {
                 if (playerStamina > 0f)
                 {
-                    if (!playerMovement.isJumping)
+                    if (!playerMovement.hasJumped)
                     {
                         playerStamina -= Time.deltaTime * staminaSpeed;
                     }
@@ -72,7 +72,7 @@ public class PlayerStats : MonoBehaviour
                     canRun = false;
                 }
             }
-            if (playerMovement.isJumping && canJump)
+            if (playerMovement.hasJumped && canJump)
             {
                 if (playerStamina >= 10f)
                 {
@@ -90,7 +90,7 @@ public class PlayerStats : MonoBehaviour
         if (playerStamina < 100f)
         {
             //Stamina recover
-            if (!playerMovement.isRunning && !playerMovement.isJumping)
+            if (!playerMovement.isRunning && !playerMovement.hasJumped)
             {
                 playerStamina += Time.deltaTime * staminaChangeSpeed * adrenalineModifier;
                 if (playerStamina > 100f)
@@ -107,7 +107,7 @@ public class PlayerStats : MonoBehaviour
             }
 
             //Jump recover
-            if (playerStamina >= staminaSpeed && !playerMovement.isJumping)
+            if (playerStamina >= staminaSpeed && !playerMovement.hasJumped)
             {
                 if(canRecoverJump)
                     canJump = true;

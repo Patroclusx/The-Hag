@@ -100,16 +100,9 @@ public class DoorInteraction : MonoBehaviour
             }
             else
             {
-                if (!isLocked)
+                if (PlayerStats.canInteract && Input.GetKeyDown(KeyCode.Mouse0))
                 {
-                    if (PlayerStats.canInteract && Input.GetKeyDown(KeyCode.Mouse0))
-                    {
-                        grabDoor();
-                    }
-                }
-                else
-                {
-                    //TODO: Tell player door is locked
+                    grabDoor();
                 }
             }
         }
@@ -387,34 +380,42 @@ public class DoorInteraction : MonoBehaviour
         {
             if (hitInfo.transform.gameObject.Equals(doorObject))
             {
-                //Stop any door motion
-                if (prevCoroutine != null)
+                if (!isLocked)
                 {
-                    StopCoroutine(prevCoroutine);
-                    prevCoroutine = null;
-                    physicsVelocity = 0f;
-                }
-
-                //Play door handle animation
-                if (doorHandleAnimator != null)
-                {
-                    if (isDoorClosed(0f))
+                    //Stop any door motion
+                    if (prevCoroutine != null)
                     {
-                        switch (isLeftSided) {
-                            case true: 
-                                doorHandleAnimator.SetTrigger("triggerHandleLeft");
-                                break;
-                            case false:
-                                doorHandleAnimator.SetTrigger("triggerHandleRight");
-                                break;
+                        StopCoroutine(prevCoroutine);
+                        prevCoroutine = null;
+                        physicsVelocity = 0f;
+                    }
+
+                    //Play door handle animation
+                    if (doorHandleAnimator != null)
+                    {
+                        if (isDoorClosed(0f))
+                        {
+                            switch (isLeftSided)
+                            {
+                                case true:
+                                    doorHandleAnimator.SetTrigger("triggerHandleLeft");
+                                    break;
+                                case false:
+                                    doorHandleAnimator.SetTrigger("triggerHandleRight");
+                                    break;
+                            }
                         }
                     }
-                }
 
-                mouseLook.isInteracting = true;
-                PlayerStats.canInteract = false;
-                isSlammed = false;
-                isDoorGrabbed = true;
+                    mouseLook.isInteracting = true;
+                    PlayerStats.canInteract = false;
+                    isSlammed = false;
+                    isDoorGrabbed = true;
+                }
+                else
+                {
+                    HintUI.instance.displayHintMessage("Door is locked!");
+                }
             }
         }
     }

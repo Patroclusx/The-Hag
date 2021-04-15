@@ -69,16 +69,9 @@ public class WindowInteraction : MonoBehaviour
             }
             else
             {
-                if (!isLocked)
+                if (PlayerStats.canInteract && Input.GetKeyDown(KeyCode.Mouse0))
                 {
-                    if (PlayerStats.canInteract && Input.GetKeyDown(KeyCode.Mouse0))
-                    {
-                        grabWindow();
-                    }
-                }
-                else
-                {
-                    //TODO: Tell player window is locked
+                    grabWindow();
                 }
             }
         }
@@ -116,9 +109,16 @@ public class WindowInteraction : MonoBehaviour
         {
             if (hitInfo.transform.gameObject.Equals(windowObject))
             {
-                mouseLook.isInteracting = true;
-                PlayerStats.canInteract = false;
-                isWindowGrabbed = true;
+                if (!isLocked)
+                {
+                    mouseLook.isInteracting = true;
+                    PlayerStats.canInteract = false;
+                    isWindowGrabbed = true;
+                }
+                else
+                {
+                    HintUI.instance.displayHintMessage("Window is locked!");
+                }
             }
         }
     }

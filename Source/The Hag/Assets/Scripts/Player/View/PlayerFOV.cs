@@ -17,7 +17,7 @@ public class PlayerFOV : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (playerMovement.isRunning || playerMovement.verticalVelocity.y < -10f || (playerMovement.isSliding && playerMovement.slopeSpeed > 4.5f)) 
+        if (playerMovement.isRunning || playerMovement.verticalVelocity.y < -10f) 
         {
             mainCamera.fieldOfView = Mathf.Lerp(mainCamera.fieldOfView, (defaultFov + 15f), distortionSensitivity * Time.deltaTime);
         }
