@@ -8,12 +8,13 @@ public class DoorInteraction : MonoBehaviour
     public float maxOpeningDegrees = 120f;
     public bool isLeftSided;
     public bool isLocked;
-    GameObject player;
+    PlayerMovement playerMovement;
     MouseLook mouseLook;
     Animator doorHandleAnimator;
 
     bool isDoorGrabbed = false;
     bool isSlammed = false;
+    bool isPlayerColliding = false;
 
     float yDegMotion;
     float lastYDegMotion;
@@ -31,14 +32,23 @@ public class DoorInteraction : MonoBehaviour
 
     void Reset()
     {
+        //Auto set door params
         gameObject.tag = "Interactable";
         gameObject.layer = LayerMask.NameToLayer("Door");
+
+        //Auto add trigger collider
+        BoxCollider boxCollider = gameObject.GetComponent<BoxCollider>();
+        if (gameObject.GetComponent<BoxCollider>() != null)
+            DestroyImmediate(boxCollider);
+        boxCollider = gameObject.AddComponent<BoxCollider>();
+        boxCollider.isTrigger = true;
+        boxCollider.size = new Vector3(boxCollider.size.x + 0.1f, boxCollider.size.y, boxCollider.size.z + 0.2f);
     }
 
     void Start()
     {
         doorObject = gameObject;
-        player = GameObject.FindGameObjectWithTag("Player");
+        playerMovement = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerMovement>();
         mouseLook = Camera.main.GetComponent<MouseLook>();
         doorHandleAnimator = doorObject.GetComponentInChildren<Animator>();
         defaultClosedRotation = doorObject.transform.parent.rotation;
@@ -110,6 +120,30 @@ public class DoorInteraction : MonoBehaviour
         if (!isDoorGrabbed && prevCoroutine == null && !isDoorClosed(0f) && isDoorClosed(1.5f))
         {
             closeDoor();
+        }
+    }
+
+    void OnTriggerEnter(Collider other)
+    {
+        if (other.gameObject.CompareTag("Player"))
+        {
+            //Stop any door motion
+            if (prevCoroutine != null)
+            {
+                StopCoroutine(prevCoroutine);
+                prevCoroutine = null;
+            }
+            physicsVelocity = 0f;
+
+            isPlayerColliding = true;
+        }
+    }
+
+    void OnTriggerExit(Collider other)
+    {
+        if (other.gameObject.CompareTag("Player"))
+        {
+            isPlayerColliding = false;
         }
     }
 
@@ -233,7 +267,7 @@ public class DoorInteraction : MonoBehaviour
     //Apply velocity to door
     void applyVelocityToDoor(float multiplier)
     {
-        if (physicsVelocity != 0)
+        if (physicsVelocity != 0f)
         {
             calcVelocityToRotation(multiplier);
 
@@ -283,34 +317,40 @@ public class DoorInteraction : MonoBehaviour
 
     void calcYDegMotion()
     {
-        float sensitivity = 0.7f;
-        float mouseX = Input.GetAxis("Mouse X") * (mouseLook.mouseSens * sensitivity);
-        float mouseY = Input.GetAxis("Mouse Y") * (mouseLook.mouseSens * sensitivity);
-        float walkX = Input.GetAxis("Vertical") * sensitivity;
-        float walkY = Input.GetAxis("Horizontal") * sensitivity;
+        float sensitivityM = 0.3f;
+        float sensitivityW = 52f;
+        float mouseX = Input.GetAxis("Mouse X") * (mouseLook.mouseSens * sensitivityM);
+        float mouseY = Input.GetAxis("Mouse Y") * (mouseLook.mouseSens * sensitivityM);
+        float walkX = Input.GetAxis("Vertical") * sensitivityW * Time.deltaTime;
+        float walkY = Input.GetAxis("Horizontal") * sensitivityW * Time.deltaTime;
 
         calcMouseDotProduct();
         calcWalkDotProduct();
 
         //Player movement
-        if (walkDotProduct < -0.5f)
+        if (playerMovement.isPlayerMoving())
         {
-            //Front Side
-            yDegMotion = clampRotation(isLeftSided ? yDegMotion - walkX : yDegMotion + walkX);
-        }
-        else if (walkDotProduct > 0.5f)
-        {
-            //Back Side
-            yDegMotion = clampRotation(isLeftSided ? yDegMotion + walkX : yDegMotion - walkX);
-        }
-        else
-        {
-            //In between
-            yDegMotion = clampRotation(yDegMotion - walkY);
+            if (walkDotProduct < -0.5f)
+            {
+                //Front Side
+                yDegMotion = clampRotation(isLeftSided ? yDegMotion - walkX : yDegMotion + walkX);
+            }
+            else if (walkDotProduct > 0.5f)
+            {
+                //Back Side
+                yDegMotion = clampRotation(isLeftSided ? yDegMotion + walkX : yDegMotion - walkX);
+            }
+            else
+            {
+                //In between
+                yDegMotion = clampRotation(yDegMotion - walkY);
+            }
         }
 
         //Mouse movement
-        if(walkDotProduct < 0f)
+        mouseY = isPlayerColliding && mouseY < 0f ? 0f : mouseY;
+
+        if (walkDotProduct < 0f)
         {
             //Front side
             if(mouseDotProduct < 0.46f && mouseDotProduct > -0.46f)
@@ -323,10 +363,12 @@ public class DoorInteraction : MonoBehaviour
                 //Angled look
                 if (mouseDotProduct > 0.455f)
                 {
+                    mouseX = isPlayerColliding && mouseX > 0f ? 0f : mouseX;
                     yDegMotion = clampRotation(isLeftSided ? yDegMotion + mouseX : yDegMotion - mouseX);
                 }
                 else if (mouseDotProduct < -0.455f)
                 {
+                    mouseX = isPlayerColliding && mouseX < 0f ? 0f : mouseX;
                     yDegMotion = clampRotation(isLeftSided ? yDegMotion - mouseX : yDegMotion + mouseX);
                 }
             }
@@ -344,10 +386,12 @@ public class DoorInteraction : MonoBehaviour
                 //Angled look
                 if (mouseDotProduct > 0.455f)
                 {
+                    mouseX = isPlayerColliding && mouseX < 0f ? 0f : mouseX;
                     yDegMotion = clampRotation(isLeftSided ? yDegMotion + mouseX : yDegMotion - mouseX);
                 }
                 else if (mouseDotProduct < -0.455f)
                 {
+                    mouseX = isPlayerColliding && mouseX > 0f ? 0f : mouseX;
                     yDegMotion = clampRotation(isLeftSided ? yDegMotion - mouseX : yDegMotion + mouseX);
                 }
             }

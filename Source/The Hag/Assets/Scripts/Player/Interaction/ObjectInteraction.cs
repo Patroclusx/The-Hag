@@ -51,7 +51,7 @@ public class ObjectInteraction : MonoBehaviour
         {
             if (!carryingObject)
             {
-                if (PlayerStats.canInteract && Input.GetKeyDown(KeyCode.Mouse0) && !checkObjUnderPlayer())
+                if (PlayerStats.canInteract && Input.GetKeyDown(KeyCode.Mouse0))
                 {
                     pickUpObject();
                 }
@@ -105,31 +105,34 @@ public class ObjectInteraction : MonoBehaviour
 
             if (objectInHand.tag == "Interactable" && objectInHandRB != null)
             {
-                //Get object defaults
-                defaultParent = objectInHand.transform.parent;
-                defaultScale = objectInHand.transform.localScale;
-                defaultDrag = objectInHandRB.drag;
-                defaultAngularDrag = objectInHandRB.angularDrag;
-
-                //Set object params
-                calcDistanceBySize();
-                if (objectInHandRB.mass < maxObjectWeight)
+                if (!checkIfObjUnderPlayer())
                 {
-                    objectInHand.transform.parent = gameObject.transform;
-                    objectInHandRB.useGravity = false;
-                }
-                else
-                {
-                    playerMovement.playerStats.walkSpeed = playerMovement.playerStats.walkSpeed * 0.7f - (1f - 5f / objectInHandRB.mass);
-                    playerMovement.playerStats.setCanRun(false);
-                    carryingHeavyObject = true;
-                }
-                stopObjectForces();
-                objectInHand.layer = LayerMask.NameToLayer("ObjectCarried");
+                    //Get object defaults
+                    defaultParent = objectInHand.transform.parent;
+                    defaultScale = objectInHand.transform.localScale;
+                    defaultDrag = objectInHandRB.drag;
+                    defaultAngularDrag = objectInHandRB.angularDrag;
 
-                carryingObject = true;
-                isObjectGrabbed = true;
-                PlayerStats.canInteract = false;
+                    //Set object params
+                    calcDistanceBySize();
+                    if (objectInHandRB.mass < maxObjectWeight)
+                    {
+                        objectInHand.transform.parent = gameObject.transform;
+                        objectInHandRB.useGravity = false;
+                    }
+                    else
+                    {
+                        playerMovement.playerStats.walkSpeed = playerMovement.playerStats.walkSpeed * 0.7f - (1f - 5f / objectInHandRB.mass);
+                        playerMovement.playerStats.setCanRun(false);
+                        carryingHeavyObject = true;
+                    }
+                    stopObjectForces();
+                    objectInHand.layer = LayerMask.NameToLayer("ObjectCarried");
+
+                    carryingObject = true;
+                    isObjectGrabbed = true;
+                    PlayerStats.canInteract = false;
+                }
             }
         }
     }
@@ -278,7 +281,7 @@ public class ObjectInteraction : MonoBehaviour
         }
 
         //Object under player
-        if (checkObjUnderPlayer())
+        if (checkIfObjUnderPlayer())
         {
             dropObj();
         }
@@ -291,14 +294,9 @@ public class ObjectInteraction : MonoBehaviour
         }
     }
 
-    bool checkObjUnderPlayer()
+    bool checkIfObjUnderPlayer()
     {
-        Vector3 cameraPosition = mainCamera.transform.position;
-        Vector3 playerPosition = playerMovement.transform.position;
-
-        float playerDistance = Vector3.Distance(playerPosition, cameraPosition);
-
-        if (Physics.Raycast(playerPosition, Vector3.down, playerDistance, LayerMask.GetMask("Object") | LayerMask.GetMask("ObjectCarried"), QueryTriggerInteraction.Ignore))
+        if(playerMovement.gameObjectUnderPlayer != null && playerMovement.gameObjectUnderPlayer == objectInHand)
         {
             return true;
         }

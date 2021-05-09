@@ -18,8 +18,7 @@ public class PlayerMovement : MonoBehaviour
     [HideInInspector]
     public Vector3 moveVelocity;
 
-    [HideInInspector]
-    public bool isJumping = false;
+    private bool isJumping = false;
     [HideInInspector]
     public bool hasJumped = false;
     [Header("Movement Attributes")]
@@ -35,6 +34,9 @@ public class PlayerMovement : MonoBehaviour
     [HideInInspector]
     public bool isGrounded;
     public LayerMask groundMask;
+    public float wallHitTolerance = 0.8f;
+    private bool didWalkIntoWall = false;
+    private Vector3 moveDirectionOnWallCollision;
     float defaultStepOffset;
 
     [HideInInspector]
@@ -42,7 +44,7 @@ public class PlayerMovement : MonoBehaviour
 
     private void Start()
     {
-        defaultCameraPosition = Camera.main.transform.position;
+        defaultCameraPosition = Camera.main.transform.localPosition;
         defaultStepOffset = characterController.stepOffset;
     }
 
@@ -52,17 +54,19 @@ public class PlayerMovement : MonoBehaviour
         isGrounded = characterController.isGrounded;
 
         //Movement logic 
-        bool move = (Input.GetAxis("Horizontal") != 0 || Input.GetAxis("Vertical") != 0);
+        bool move = (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.D));
         if (move && !isClimbing)
         {
             MovePlayer();
         }
         else
         {
+            //Reset all player movement stats
             moveVelocity.Set(0f, 0f, 0f);
             playerSpeed = 0f;
             isWalking = false;
             isRunning = false;
+            didWalkIntoWall = false;
         }
 
         //Climbing logic
@@ -103,7 +107,7 @@ public class PlayerMovement : MonoBehaviour
         }
         else
         {
-            if(verticalVelocity.y < -4.4f)
+            if (verticalVelocity.y < -4.4f)
             {
                 PlayImpactSound();
             }
@@ -139,7 +143,7 @@ public class PlayerMovement : MonoBehaviour
             }
         }
 
-        if (!checkForWallHit() || hasJumped)
+        if (!didWalkIntoWall)
         {
             //Sprinting logic (An Ultimatees original comment)
             if (Input.GetKey(KeyCode.LeftShift) && z >= 0.5f && !isCrouching && playerStats.canRun)
@@ -168,52 +172,22 @@ public class PlayerMovement : MonoBehaviour
         }
         else
         {
+            //Reset player movement stats
+            playerSpeed = 0f;
             isRunning = false;
             isWalking = false;
+
+            //Reset wall hit state when looked away
+            if(Vector3.Dot(moveDirectionOnWallCollision, moveVelocity) < wallHitTolerance)
+            {
+                didWalkIntoWall = false;
+            }
         }
     }
 
     public bool isPlayerMoving()
     {
         return isWalking || isRunning;
-    }
-
-    void OnControllerColliderHit(ControllerColliderHit hit)
-    {
-        pushRigidBodyObjects(hit);
-    }
-
-    void pushRigidBodyObjects(ControllerColliderHit hit)
-    {
-        Rigidbody objectBody = hit.collider.attachedRigidbody;
-
-        // Not a rigidbody
-        if (objectBody == null || objectBody.isKinematic)
-            return;
-
-        // We dont want to push heavy objects or objects below us
-        if (hit.moveDirection.y < -0.3f || objectBody.mass >= 5f)
-            return;
-
-        // Calculate push direction from move direction,
-        // We only push objects to the sides never up and down
-        Vector3 pushDir = new Vector3(hit.moveDirection.x, 0, hit.moveDirection.z);
-
-        // Apply the push
-        objectBody.velocity = pushDir * 2f;
-    }
-
-    //Returns true if player is walking into a wall
-    bool checkForWallHit()
-    {
-        float rayHeightOffset = 0.1f;
-        float rayLenghtOffset = 0.14f;
-        Vector3 checkPosition = gameObject.transform.position - new Vector3(0f, characterController.bounds.extents.y - characterController.stepOffset - rayHeightOffset, 0f);
-
-        RaycastHit rayHit;
-        bool checkWall = Physics.Raycast(checkPosition, moveVelocity, out rayHit, (characterController.radius / 2f) + rayLenghtOffset, ~LayerMask.GetMask("Player"), QueryTriggerInteraction.Ignore);
-
-        return checkWall;
     }
 
     void Climb()
@@ -280,6 +254,73 @@ public class PlayerMovement : MonoBehaviour
         }
 
         Camera.main.GetComponent<HeadBobbing>().updateDefaultPosY(Camera.main.transform.localPosition.y);
+    }
+
+    void OnControllerColliderHit(ControllerColliderHit hit)
+    {
+        //Check for horizontal collisions only
+        if (hit.moveDirection.y == 0f)
+        {
+            if (!pushRigidBodyObjects(hit))
+            {
+                checkForWallHit(hit);
+            }
+        }
+        else
+        {
+            checkObjectBelowPlayer(hit);
+        }
+    }
+
+    //Pushes small rigidbodies around when collided with
+    //Returns true if object can be pushed and/or is being pushed
+    bool pushRigidBodyObjects(ControllerColliderHit hit)
+    {
+        Rigidbody objectBody = hit.rigidbody;
+
+        // Not a rigidbody
+        if (objectBody == null || objectBody.isKinematic)
+            return false;
+
+        // Do not push heavy objects
+        if (objectBody.mass >= 5f)
+            return false;
+
+        // Calculate push direction from move direction
+        // Only push objects along X and Y
+        Vector3 pushDir = new Vector3(hit.moveDirection.x, 0, hit.moveDirection.z);
+
+        // Apply the push
+        objectBody.velocity = pushDir * 2f;
+
+        return true;
+    }
+
+    //Returns true if player is walking into a wall
+    void checkForWallHit(ControllerColliderHit hit)
+    {
+        //If collided object is being pushed than do not stop the player
+        if (hit.collider.gameObject.layer == LayerMask.NameToLayer("ObjectCarried"))
+            return;
+
+        //Compare surface normal to direction of movement when colliding
+        if (Vector3.Dot(hit.moveDirection, hit.normal) <= -wallHitTolerance)
+        {
+            moveDirectionOnWallCollision = hit.moveDirection;
+            didWalkIntoWall = true;
+        }
+    }
+
+    //Check and sets the game object that is under the player
+    public GameObject gameObjectUnderPlayer = null;
+    void checkObjectBelowPlayer(ControllerColliderHit hit)
+    {
+        Vector3 pointOfHitLocal = transform.InverseTransformPoint(hit.point);
+
+        if(pointOfHitLocal.y < (characterController.height * 0.5f) - 0.3f)
+        {
+            gameObjectUnderPlayer = hit.collider.gameObject;
+        }
     }
 
     void PlayStepSound()

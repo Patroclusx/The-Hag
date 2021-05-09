@@ -12,7 +12,7 @@ public class Crosshair : MonoBehaviour
     void Update()
     {
         RaycastHit hitInfo;
-        bool raycast = Physics.Raycast(Camera.main.transform.position, Camera.main.transform.forward, out hitInfo, PlayerStats.reachDistance, ~LayerMask.GetMask("Player"), QueryTriggerInteraction.Collide);
+        bool raycast = Physics.Raycast(Camera.main.transform.position, Camera.main.transform.forward, out hitInfo, PlayerStats.reachDistance, ~LayerMask.GetMask("Player"), QueryTriggerInteraction.Ignore);
 
         Item selectedItem = Inventory.instance != null ? Inventory.instance.selectedItem : null;
         if(selectedItem != null)

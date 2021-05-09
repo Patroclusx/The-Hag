@@ -2,9 +2,10 @@
 
 public class MouseLook : MonoBehaviour
 {
+    public PlayerMovement playerMovement;
+
     [Range(0.3f, 2f)]
     public float mouseSens = 1f;
-    public Transform player;
 
     [HideInInspector]
     public bool isInteracting = false;
@@ -35,11 +36,14 @@ public class MouseLook : MonoBehaviour
         float mouseX = Input.GetAxis("Mouse X") * mouseSens;
         float mouseY = Input.GetAxis("Mouse Y") * mouseSens;
 
-        xRotation -= mouseY;
-        xRotation = Mathf.Clamp(xRotation, -85f, 70f);
+        if (mouseX != 0 || mouseY != 0)
+        {
+            xRotation -= mouseY;
+            xRotation = Mathf.Clamp(xRotation, -85f, 70f);
 
-        transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
-        player.Rotate(Vector3.up * mouseX);
+            transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
+            playerMovement.transform.Rotate(Vector3.up * mouseX);
+        }
     }
 
     public void toggleInventoryCursor(bool isItemSelected)

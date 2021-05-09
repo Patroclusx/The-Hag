@@ -16,7 +16,7 @@ public class ItemInteraction : MonoBehaviour
     {
         if (Input.GetMouseButtonDown(0))
         {
-            Item selectedItem = inventory != null ? inventory.selectedItem : null; ;
+            Item selectedItem = inventory != null ? inventory.selectedItem : null;
             if (selectedItem != null)
             {
                 RaycastHit hitInfo;
@@ -36,7 +36,7 @@ public class ItemInteraction : MonoBehaviour
     void pickUpItem()
     {
         RaycastHit hitInfo;
-        if (Physics.Raycast(Camera.main.transform.position, Camera.main.transform.forward, out hitInfo, PlayerStats.reachDistance, LayerMask.GetMask("Item"), QueryTriggerInteraction.Collide))
+        if (Physics.Raycast(Camera.main.transform.position, Camera.main.transform.forward, out hitInfo, PlayerStats.reachDistance, LayerMask.GetMask("Item"), QueryTriggerInteraction.Ignore))
         {
             itemInHand = hitInfo.transform.gameObject;
 
