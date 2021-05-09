@@ -20,6 +20,7 @@ public class PlayerStats : MonoBehaviour
     public float walkSpeed = 2f;
     public float sprintSpeed = 4f;
     public float climbSpeed = 1f;
+    public float fallDamageSpeed = 1f;
 
     [Header("Player Stamina")]
     //Stamina
@@ -29,10 +30,14 @@ public class PlayerStats : MonoBehaviour
     public float adrenalineModifier = 2f;
     [HideInInspector]
     public bool isAdrenalineOn = false;
+
     [HideInInspector]
     public bool canRun = true;
     [HideInInspector]
     public bool canJump = true;
+
+    [HideInInspector]
+    public bool hasFallDamage = false;
 
     bool canRecoverRun = true;
     bool canRecoverJump = true;
@@ -45,7 +50,11 @@ public class PlayerStats : MonoBehaviour
         {
             staminaSpeed = staminaChangeSpeed / adrenalineModifier;
         }
+
         handleStamina(staminaSpeed);
+
+        if (hasFallDamage)
+            recoverFallDamage();
     }
 
     void handleStamina(float staminaSpeed)
@@ -125,5 +134,27 @@ public class PlayerStats : MonoBehaviour
     {
         this.canJump = canJump;
         canRecoverJump = canJump;
+    }
+
+    private float fallDamageRecoveryTimer = 0f;
+    private float fallDamageRecoveryLenght = 0f;
+    public void setFallDamage(float lengthMuliplier)
+    {
+        fallDamageRecoveryLenght = 1f * lengthMuliplier;
+
+        fallDamageRecoveryTimer = 0f;
+        hasFallDamage = true;
+    }
+    public void recoverFallDamage()
+    {
+        if(fallDamageRecoveryTimer < fallDamageRecoveryLenght)
+        {
+            fallDamageRecoveryTimer += Time.deltaTime;
+        }
+        else
+        {
+            fallDamageRecoveryTimer = 0f;
+            hasFallDamage = false;
+        }
     }
 }

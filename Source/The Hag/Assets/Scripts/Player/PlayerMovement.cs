@@ -107,9 +107,15 @@ public class PlayerMovement : MonoBehaviour
         }
         else
         {
-            if (verticalVelocity.y < -4.4f)
+            if (verticalVelocity.y < -6f)
             {
                 PlayImpactSound();
+
+                if(verticalVelocity.y < -10f)
+                {
+                    //Fall damage
+                    playerStats.setFallDamage(Mathf.Abs(verticalVelocity.y * 0.15f));
+                }
             }
             if (verticalVelocity.y < 0f)
             {
@@ -146,7 +152,7 @@ public class PlayerMovement : MonoBehaviour
         if (!didWalkIntoWall)
         {
             //Sprinting logic (An Ultimatees original comment)
-            if (Input.GetKey(KeyCode.LeftShift) && z >= 0.5f && !isCrouching && playerStats.canRun)
+            if (Input.GetKey(KeyCode.LeftShift) && z >= 0.5f && !isCrouching && playerStats.canRun && !playerStats.hasFallDamage)
             {
                 playerSpeed = playerStats.sprintSpeed;
                 isRunning = true;
@@ -156,7 +162,7 @@ public class PlayerMovement : MonoBehaviour
             {
                 if (!isCrouching)
                 {
-                    playerSpeed = playerStats.walkSpeed;
+                    playerSpeed = playerStats.hasFallDamage ? playerStats.fallDamageSpeed : playerStats.walkSpeed;
                 }
                 else
                 {

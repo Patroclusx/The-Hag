@@ -6165,6 +6165,7 @@ MonoBehaviour:
   walkSpeed: 2
   sprintSpeed: 4
   climbSpeed: 1
+  fallDamageSpeed: 1
   isStaminaDrainEnabled: 0
   playerStamina: 100
   staminaChangeSpeed: 15
@@ -6172,6 +6173,7 @@ MonoBehaviour:
   isAdrenalineOn: 0
   canRun: 1
   canJump: 1
+  hasFallDamage: 0
 --- !u!114 &1888771462
 MonoBehaviour:
   m_ObjectHideFlags: 0
