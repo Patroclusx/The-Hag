@@ -335,7 +335,10 @@ public class PlayerMovement : MonoBehaviour
         {
             if (isWalking && !isCrouching)
             {
-                audioManager.playCollectionSound3D("Sound_Step_Walk_Dirt", true, 0.45f, gameObject);
+                float baseSpeed = 0.9f;
+                float stepSpeed = Mathf.Clamp(baseSpeed / playerSpeed, 0.4f, 0.75f);
+
+                audioManager.playCollectionSound3D("Sound_Step_Walk_Dirt", true, stepSpeed, gameObject);
             }
             else if (isRunning)
             {

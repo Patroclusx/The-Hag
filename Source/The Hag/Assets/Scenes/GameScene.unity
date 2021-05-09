@@ -1279,6 +1279,54 @@ RectTransform:
     type: 3}
   m_PrefabInstance: {fileID: 253441447}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &266800778 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 966106575887212137, guid: b4c586b064e581e46aabedc30085bccb,
+    type: 3}
+  m_PrefabInstance: {fileID: 2140558569}
+  m_PrefabAsset: {fileID: 0}
+--- !u!65 &266800780
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 266800778}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 1.2704004, y: 2.814, z: 0.35960013}
+  m_Center: {x: 0.55001676, y: 4.38809e-24, z: -0.000000059604645}
+--- !u!114 &266800781
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 266800778}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6f358fb88baad904284f47527c9dbfed, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  maxOpeningDegrees: 120
+  isLeftSided: 0
+  isLocked: 0
+--- !u!64 &266800782
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 266800778}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 4
+  m_Convex: 1
+  m_CookingOptions: 30
+  m_Mesh: {fileID: -2548545594195611755, guid: b4c586b064e581e46aabedc30085bccb, type: 3}
 --- !u!1 &304756370
 GameObject:
   m_ObjectHideFlags: 0
@@ -6573,6 +6621,16 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -3747338494648589527, guid: b4c586b064e581e46aabedc30085bccb,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -3127211962214533827, guid: b4c586b064e581e46aabedc30085bccb,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: -2168391115750869502, guid: b4c586b064e581e46aabedc30085bccb,
         type: 3}
       propertyPath: m_Layer
@@ -6612,6 +6670,16 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: haghouse
+      objectReference: {fileID: 0}
+    - target: {fileID: 966106575887212137, guid: b4c586b064e581e46aabedc30085bccb,
+        type: 3}
+      propertyPath: m_Layer
+      value: 14
+      objectReference: {fileID: 0}
+    - target: {fileID: 966106575887212137, guid: b4c586b064e581e46aabedc30085bccb,
+        type: 3}
+      propertyPath: m_TagString
+      value: Interactable
       objectReference: {fileID: 0}
     - target: {fileID: 2431431439787477990, guid: b4c586b064e581e46aabedc30085bccb,
         type: 3}
