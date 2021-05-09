@@ -1,15 +1,12 @@
 ﻿using UnityEngine;
 
-/* TODO
- * Material based step sliding and impact sounds
- */
-
 public class PlayerMovement : MonoBehaviour
 {
     public CharacterController characterController;
     public PlayerStats playerStats;
-    public Transform groundCheck;
     public AudioManager audioManager;
+
+    private Vector3 defaultCameraPosition;
 
     [HideInInspector]
     public bool isWalking = false;
@@ -17,17 +14,14 @@ public class PlayerMovement : MonoBehaviour
     public bool isRunning = false;
     [HideInInspector]
     public float playerSpeed;
-    public float walkSpeed = 2f;
-    public float sprintSpeed = 4f;
-    public float climbSpeed = 1f;
 
     [HideInInspector]
     public Vector3 moveVelocity;
 
-    [HideInInspector]
-    public bool isJumping = false;
+    private bool isJumping = false;
     [HideInInspector]
     public bool hasJumped = false;
+    [Header("Movement Attributes")]
     public float gravityForce = -25f;
     public float jumpHeight = 0.8f;
     [HideInInspector]
@@ -39,46 +33,44 @@ public class PlayerMovement : MonoBehaviour
 
     [HideInInspector]
     public bool isGrounded;
-    [HideInInspector]
-    public float groundDistanceNormal = 0.35f;
     public LayerMask groundMask;
+    public float wallHitTolerance = 0.8f;
+    private bool didWalkIntoWall = false;
+    private Vector3 moveDirectionOnWallCollision;
     float defaultStepOffset;
-
-    [HideInInspector]
-    public bool isSliding = false;
-    [HideInInspector]
-    public float slopeSpeed = 0;
 
     [HideInInspector]
     public bool isClimbing = false;
 
     private void Start()
     {
+        defaultCameraPosition = Camera.main.transform.localPosition;
         defaultStepOffset = characterController.stepOffset;
     }
 
     // Update is called once per frame
     void Update()
     {
-        //Ground check logic
-        isGrounded = Physics.CheckSphere(groundCheck.position, groundDistanceNormal, groundMask, QueryTriggerInteraction.Ignore);
+        isGrounded = characterController.isGrounded;
 
         //Movement logic 
-        bool isMoving = (Input.GetAxis("Horizontal") != 0 || Input.GetAxis("Vertical") != 0);
-        if (isMoving && !isClimbing && !isSliding)
+        bool move = (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.D));
+        if (move && !isClimbing)
         {
             MovePlayer();
-            PlayStepSound();
         }
         else
         {
+            //Reset all player movement stats
+            moveVelocity.Set(0f, 0f, 0f);
             playerSpeed = 0f;
             isWalking = false;
             isRunning = false;
+            didWalkIntoWall = false;
         }
 
         //Climbing logic
-        if (Input.GetAxis("Vertical") != 0 && isClimbing)
+        if (move && isClimbing)
         {
             Climb();
         }
@@ -90,7 +82,7 @@ public class PlayerMovement : MonoBehaviour
         }
 
         //Jumping logic
-        if (Input.GetKeyDown(KeyCode.Space) && !hasJumped && !isCrouching && !isSliding && !isClimbing)
+        if (Input.GetKeyDown(KeyCode.Space) && !hasJumped && !isCrouching && !isClimbing)
         {
             Jump();
         }
@@ -107,6 +99,7 @@ public class PlayerMovement : MonoBehaviour
         if (!isGrounded)
         {
             verticalVelocity.y += gravityForce * Time.deltaTime;
+
             if (hasJumped)
             {
                 isJumping = true;
@@ -114,7 +107,7 @@ public class PlayerMovement : MonoBehaviour
         }
         else
         {
-            if(verticalVelocity.y < -4f)
+            if (verticalVelocity.y < -4.4f)
             {
                 PlayImpactSound();
             }
@@ -129,42 +122,9 @@ public class PlayerMovement : MonoBehaviour
                 hasJumped = false;
                 isJumping = false;
             }
-
-            Slide();
         }
 
         characterController.Move(verticalVelocity * Time.deltaTime);
-    }
-
-    private void Slide()
-    {
-        float slideSpeed = 10f;
-        RaycastHit groundHit;
-
-        bool groundRayCast = Physics.Raycast(gameObject.transform.position, Vector3.down, out groundHit, 1.2f, -1, QueryTriggerInteraction.Ignore);
-        Vector3 groundNormal = groundHit.normal;
-
-        Vector3 groundParallel = Vector3.Cross(gameObject.transform.up, groundNormal);
-        Vector3 slopeParallel = Vector3.Cross(groundParallel, groundNormal);
-
-        float currentSlope = Mathf.Round(Vector3.Angle(groundNormal, gameObject.transform.up));
-
-        if (isGrounded && groundRayCast && currentSlope > characterController.slopeLimit)
-        {
-            slopeSpeed += Time.deltaTime * (slopeParallel.magnitude + (isSliding ? 0f : (moveVelocity.magnitude * 80f))) * slideSpeed;
-            characterController.Move(slopeParallel * slopeSpeed * Time.deltaTime);
-            audioManager.playSound3D("Sound_Player_Slide", false, 0f, gameObject);
-            isSliding = true;
-        }
-        else
-        {
-            if (isSliding)
-            {
-                audioManager.fadeOutSound3D("Sound_Player_Slide", 0.35f, gameObject);
-                slopeSpeed = 0;
-                isSliding = false;
-            }
-        }
     }
 
     void MovePlayer()
@@ -172,46 +132,69 @@ public class PlayerMovement : MonoBehaviour
         float x = Input.GetAxis("Horizontal");
         float z = Input.GetAxis("Vertical");
 
-        //Sprinting logic
-        if (Input.GetKey(KeyCode.LeftShift) && z == 1 && !isCrouching && playerStats.canRun)
-        {
-            playerSpeed = sprintSpeed;
-            isRunning = true;
-            isWalking = false;
-        }
-        else
-        {
-            if (!isCrouching)
-            {
-                playerSpeed = walkSpeed;
-            }
-            else
-            {
-                playerSpeed = walkSpeed * 0.5f;
-            }
-
-            isWalking = true;
-            isRunning = false;
-        }
-
         if (isGrounded)
         {
             moveVelocity = gameObject.transform.right * x + gameObject.transform.forward * z;
+
+            //Strafe running speed fix
+            if (x != 0f && z != 0f)
+            {
+                moveVelocity *= 0.75f;
+            }
         }
 
-        //Strafe running speed fix
-        if (x != 0 && z != 0)
+        if (!didWalkIntoWall)
         {
-            playerSpeed *= 0.75f;
-        }
+            //Sprinting logic (An Ultimatees original comment)
+            if (Input.GetKey(KeyCode.LeftShift) && z >= 0.5f && !isCrouching && playerStats.canRun)
+            {
+                playerSpeed = playerStats.sprintSpeed;
+                isRunning = true;
+                isWalking = false;
+            }
+            else
+            {
+                if (!isCrouching)
+                {
+                    playerSpeed = playerStats.walkSpeed;
+                }
+                else
+                {
+                    playerSpeed = playerStats.walkSpeed * 0.5f;
+                }
 
-        characterController.Move(moveVelocity * playerSpeed * Time.deltaTime);
+                isWalking = true;
+                isRunning = false;
+            }
+
+            characterController.Move(moveVelocity * playerSpeed * Time.deltaTime);
+            PlayStepSound();
+        }
+        else
+        {
+            //Reset player movement stats
+            playerSpeed = 0f;
+            isRunning = false;
+            isWalking = false;
+
+            //Reset wall hit state when looked away
+            if(Vector3.Dot(moveDirectionOnWallCollision, moveVelocity) < wallHitTolerance)
+            {
+                didWalkIntoWall = false;
+            }
+        }
+    }
+
+    public bool isPlayerMoving()
+    {
+        return isWalking || isRunning;
     }
 
     void Climb()
     {
-        float y = Input.GetAxis("Vertical");
-        playerSpeed = climbSpeed;
+        float x = Input.GetAxis("Horizontal");
+        float z = Input.GetAxis("Vertical");
+        playerSpeed = playerStats.climbSpeed;
 
         if (isCrouching)
         {
@@ -219,28 +202,9 @@ public class PlayerMovement : MonoBehaviour
             ApplyGravity();
         }
 
-        if (!isGrounded)
-        {
-            if (y > 0f)
-            {
-                moveVelocity = gameObject.transform.up * y + gameObject.transform.forward * y;
-            }
-            else
-            {
-                moveVelocity = gameObject.transform.up * y;
-            }
-        }
-        else
-        {
-            if(y > 0f)
-            {
-                moveVelocity = gameObject.transform.up * y;
-            }
-            else
-            {
-                moveVelocity = gameObject.transform.up * y + gameObject.transform.forward * y;
-            }
-        }
+        moveVelocity = gameObject.transform.up * z + gameObject.transform.right * x;
+        if ((!isGrounded && z > 0f) || (isGrounded && z < 0f))
+            moveVelocity += gameObject.transform.forward * z;
 
         characterController.Move(moveVelocity * playerSpeed * Time.deltaTime);
     }
@@ -250,10 +214,9 @@ public class PlayerMovement : MonoBehaviour
         if (playerStats.canJump)
         {
             Ray ray = new Ray();
-            RaycastHit hit;
             ray.origin = gameObject.transform.position;
             ray.direction = Vector3.up;
-            if (!Physics.Raycast(ray, out hit, characterController.height - 1.2f, -1, QueryTriggerInteraction.Ignore))
+            if (!Physics.Raycast(ray, characterController.height - 1.1f, -1, QueryTriggerInteraction.Ignore))
             {
                 characterController.stepOffset = 0f;
                 verticalVelocity.y = Mathf.Sqrt(jumpHeight * -1f * gravityForce);
@@ -268,7 +231,7 @@ public class PlayerMovement : MonoBehaviour
     {
         if (!isCrouching)
         {
-            groundCheck.localPosition = new Vector3(0f, groundCheck.localPosition.y + (characterController.height - crouchHeight) * 0.5f, 0f);
+            Camera.main.transform.localPosition = new Vector3(0f, Camera.main.transform.localPosition.y - (characterController.height - crouchHeight) * 0.5f, -0.072f);
             characterController.height = crouchHeight;
             gameObject.transform.position = new Vector3(gameObject.transform.position.x, gameObject.transform.position.y * 0.5f, gameObject.transform.position.z);
             isCrouching = true;
@@ -278,17 +241,85 @@ public class PlayerMovement : MonoBehaviour
         else
         {
             Ray ray = new Ray();
-            RaycastHit hit;
             ray.origin = gameObject.transform.position;
             ray.direction = Vector3.up;
-            if (!Physics.Raycast(ray, out hit, characterController.height - 0.1f, -1, QueryTriggerInteraction.Ignore))
+            if (!Physics.Raycast(ray, characterController.height - 0.05f, -1, QueryTriggerInteraction.Ignore))
             {
-                groundCheck.localPosition = new Vector3(0f, -0.55f, 0f); //Default ground check Y
-                characterController.height = 2f;
+                Camera.main.transform.localPosition = defaultCameraPosition; //Default camera pos
+                characterController.height = 2f; //Default player height
                 isCrouching = false;
 
                 audioManager.playCollectionSound2D("Sound_Player_Crouch", true, 0f);
             }
+        }
+
+        Camera.main.GetComponent<HeadBobbing>().updateDefaultPosY(Camera.main.transform.localPosition.y);
+    }
+
+    void OnControllerColliderHit(ControllerColliderHit hit)
+    {
+        //Check for horizontal collisions only
+        if (hit.moveDirection.y == 0f)
+        {
+            if (!pushRigidBodyObjects(hit))
+            {
+                checkForWallHit(hit);
+            }
+        }
+        else
+        {
+            checkObjectBelowPlayer(hit);
+        }
+    }
+
+    //Pushes small rigidbodies around when collided with
+    //Returns true if object can be pushed and/or is being pushed
+    bool pushRigidBodyObjects(ControllerColliderHit hit)
+    {
+        Rigidbody objectBody = hit.rigidbody;
+
+        // Not a rigidbody
+        if (objectBody == null || objectBody.isKinematic)
+            return false;
+
+        // Do not push heavy objects
+        if (objectBody.mass >= 5f)
+            return false;
+
+        // Calculate push direction from move direction
+        // Only push objects along X and Y
+        Vector3 pushDir = new Vector3(hit.moveDirection.x, 0, hit.moveDirection.z);
+
+        // Apply the push
+        objectBody.velocity = pushDir * 2f;
+
+        return true;
+    }
+
+    //Returns true if player is walking into a wall
+    void checkForWallHit(ControllerColliderHit hit)
+    {
+        //If collided object is being pushed than do not stop the player
+        if (hit.collider.gameObject.layer == LayerMask.NameToLayer("ObjectCarried"))
+            return;
+
+        //Compare surface normal to direction of movement when colliding
+        if (Vector3.Dot(hit.moveDirection, hit.normal) <= -wallHitTolerance)
+        {
+            moveDirectionOnWallCollision = hit.moveDirection;
+            didWalkIntoWall = true;
+        }
+    }
+
+    //Check and sets the game object that is under the player
+    public GameObject gameObjectUnderPlayer = null;
+    void checkObjectBelowPlayer(ControllerColliderHit hit)
+    {
+        Vector3 pointOfHitLocal = transform.InverseTransformPoint(hit.point);
+
+        if(pointOfHitLocal.y < (characterController.height * 0.5f) - 0.3f)
+        {
+            gameObjectUnderPlayer = hit.collider.gameObject;
         }
     }
 
@@ -311,7 +342,7 @@ public class PlayerMovement : MonoBehaviour
     void PlayImpactSound()
     {
         if (isGrounded) { 
-            audioManager.playCollectionSound3D("Sound_Step_Walk_Dirt", true, 0f, gameObject);
+            audioManager.playCollectionSound3D("Sound_Step_Walk_Dirt", false, 0f, gameObject);
         }
     }
 }

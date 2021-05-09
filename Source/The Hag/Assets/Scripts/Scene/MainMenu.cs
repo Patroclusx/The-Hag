@@ -13,7 +13,7 @@ public class MainMenu : MonoBehaviour
         menuCanvas.enabled = false;
         StartCoroutine(ModifyFov(8f));
         audioManager.playSound2D("Sound_StartGame", false, 0f);
-        sceneLoader.LoadNextScene();
+        sceneLoader.LoadNextScene(4f);
     }
     public void openSettings()
     {

@@ -15,6 +15,13 @@ public class PlayerStats : MonoBehaviour
     [System.NonSerialized]
     public static float throwForce = 180f;
 
+    [Header("Player Speed")]
+    //Speed
+    public float walkSpeed = 2f;
+    public float sprintSpeed = 4f;
+    public float climbSpeed = 1f;
+
+    [Header("Player Stamina")]
     //Stamina
     public bool isStaminaDrainEnabled = true;
     public float playerStamina = 100f;
@@ -27,11 +34,8 @@ public class PlayerStats : MonoBehaviour
     [HideInInspector]
     public bool canJump = true;
 
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+    bool canRecoverRun = true;
+    bool canRecoverJump = true;
 
     // Update is called once per frame
     void Update()
@@ -57,7 +61,7 @@ public class PlayerStats : MonoBehaviour
             {
                 if (playerStamina > 0f)
                 {
-                    if (!playerMovement.isJumping)
+                    if (!playerMovement.hasJumped)
                     {
                         playerStamina -= Time.deltaTime * staminaSpeed;
                     }
@@ -68,7 +72,7 @@ public class PlayerStats : MonoBehaviour
                     canRun = false;
                 }
             }
-            if (playerMovement.isJumping && canJump)
+            if (playerMovement.hasJumped && canJump)
             {
                 if (playerStamina >= 10f)
                 {
@@ -86,7 +90,7 @@ public class PlayerStats : MonoBehaviour
         if (playerStamina < 100f)
         {
             //Stamina recover
-            if (!playerMovement.isRunning && !playerMovement.isJumping)
+            if (!playerMovement.isRunning && !playerMovement.hasJumped)
             {
                 playerStamina += Time.deltaTime * staminaChangeSpeed * adrenalineModifier;
                 if (playerStamina > 100f)
@@ -98,14 +102,28 @@ public class PlayerStats : MonoBehaviour
             //Run recover
             if (playerStamina >= staminaSpeed * 2f && !playerMovement.isRunning)
             {
-                canRun = true;
+                if(canRecoverRun)
+                    canRun = true;
             }
 
             //Jump recover
-            if (playerStamina >= staminaSpeed && !playerMovement.isJumping)
+            if (playerStamina >= staminaSpeed && !playerMovement.hasJumped)
             {
-                canJump = true;
+                if(canRecoverJump)
+                    canJump = true;
             }
         }
+    }
+
+    public void setCanRun(bool canRun)
+    {
+        this.canRun = canRun;
+        canRecoverRun = canRun;
+    }
+
+    public void setCanJump(bool canJump)
+    {
+        this.canJump = canJump;
+        canRecoverJump = canJump;
     }
 }

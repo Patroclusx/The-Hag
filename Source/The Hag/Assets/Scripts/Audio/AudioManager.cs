@@ -3,9 +3,6 @@ using System;
 using UnityEngine;
 using UnityEngine.Audio;
 
-/* TODO: FadeOutAllSoundCR *POP* fix
- */
-
 public class AudioManager : MonoBehaviour
 {
     AudioMixer audioMixer;
